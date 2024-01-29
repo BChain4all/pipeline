@@ -29,4 +29,6 @@ with open('first_step.txt', 'r') as file:
 
 # Strip all code beside ```sol and ```
 data = data.split('pragma')[1].split('```')[0]
-print("pragma" + data)
+# print("pragma" + data)
+with open('smart_contract.sol', 'w') as file:
+        file.write("pragma" + data)

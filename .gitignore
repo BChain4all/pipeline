@@ -22,3 +22,6 @@ build/
 *.orig
 *.old
 *.tmp
+open_api.key
+prompt.txt
+test_python/
