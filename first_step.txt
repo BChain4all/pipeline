@@ -1,61 +1,58 @@
-The creation of a smart contract from a legal contract of this complexity is a significant endeavour. To do this entirely with code would be challenging due to various ambiguities and discretionary terms. Here are some aspects that could be encoded into a smart contract.
+Your request to transform the legal lease agreement into a smart contract encompasses many conditions and stipulations. Due to the complexity and multi conditional structure of the legal contract, the translated smart contract will be simplified and will only contain basic key points like Lease Term, Rental Amount, and Security Deposit. It also assumes that other real-world checks (like checking a tenant's criminal background, tenant's agreement on no pets or no smoking policy, and Landlord's responsibilities like maintenance) would be managed outside the blockchain.
 
-Below is a simplified version in Solidity, focusing on the rent collection aspect:
+Specific parts of the legal contract may not be addressed in the smart contract due to the limitation of blockchain technology. Penalty charges like Late Fees, Real-world inspections, Lawful usage of premises, any other information requiring off-chain inputs are not handled in this contract. Moreover, as smart contracts are self-executing immutable contracts, the dispute resolution and contract termination conditions are also not taken into account.
 
-```solidity
-pragma solidity >=0.5.0 <0.7.0;
+```solidity 
+pragma solidity ^0.5.1;
 
-contract RentalContract {
-    address payable public landlord;
-    address public tenant;
+contract LeaseAgreement {
+    //Struct to store Tenant Info
+    struct Tenant {
+        address tenantAddress;
+        bool isTenant;
+    }
+    //Declaration of variables
+    address public landlord;
+    uint256 public leaseTermEndDate;
     uint256 public rent;
     uint256 public securityDeposit;
-    uint256 constant lateFee = 200;
-    uint256 public startOfLease;
-    uint256 public endOfLease;
 
-    constructor(address _tenant, uint256 _rent, uint256 _securityDeposit, uint256 _startOfLease, uint256 _endOfLease) public {
+    // Mapping to save the tenants
+    mapping(address => Tenant) tenants;
+    
+    // Function to set landlord details
+    constructor(uint256 _leaseTermEndDate, uint256 _rent, uint256 _securityDeposit) public{
         landlord = msg.sender;
-        tenant = _tenant;
-        rent = _rent;
-        securityDeposit = _securityDeposit;
-        startOfLease = _startOfLease;
-        endOfLease = _endOfLease;
+        leaseTermEndDate=now+_leaseTermEndDate;
+        rent=_rent;
+        securityDeposit=_securityDeposit;
+    }
+   
+    // Landlord adds a tenant & deposits received here
+    function addTenant(address _tenantAddress) public payable {
+        require(msg.sender == landlord, "Only landlord can add a tenant");
+        require(msg.value == securityDeposit + rent, "Rent and Security Deposit required");
+        
+        Tenant storage tenant = tenants[_tenantAddress];
+        tenant.tenantAddress = _tenantAddress;
+        tenant.isTenant = true;
     }
 
+    // Tenant pays rent
     function payRent() public payable {
-        // Only tenant is allowed to pay.
-        require(msg.sender == tenant);
-        // Have to pay exact amount of rent.
-        require(msg.value == rent);
-        // Landlord receives the payment.
-        landlord.transfer(msg.value);
+        require(msg.sender == tenants[msg.sender].tenantAddress, "Only tenants can pay rent");
+        require(msg.value == rent ,"Rent amount required");
+        landlord.transfer(msg.value); 
     }
 
-    function paySecurityDeposit() public payable {
-        // Only tenant is allowed to pay.
-        require(msg.sender == tenant);
-        // Have to pay exact amount of security deposit.
-        require(msg.value == securityDeposit);
-        // Landlord receives the security deposit.
-        landlord.transfer(msg.value);
+    // Refund of security deposit after lease end
+    function refundSecurityDeposit(address _tenantAddress) public {
+        require(msg.sender == landlord, "Only landlord can refund deposit");
+        require(now > leaseTermEndDate, "Lease term not ended");
+        _tenantAddress.transfer(securityDeposit);
     }
 }
 ```
+This smart contract allows for creating an agreement with specific lease term, rent, and security deposit. It allows the landlord to add tenants, tenants to pay rent and also the refunding of security deposit after the lease term ends. Your team can use online blockchain platforms like Remix to compile and deploy this code on any Ethereum Test Network. 
 
-This is a simplified smart contract that handles renting. It doesn't include many elements of your original contract, like appliance provision, furnishings, maintenance and many more. Codifying all these in a smart contract would not make sense. 
-
-For testing the smart contract, you can use Truffle and Ganache. Truffle is a development environment for Ethereum that provides unit testing and deployment capabilities. Ganache is a private Ethereum blockchain you can use for testing.
-
-Guidelines:
-- Rent Payment test: Verify if only the tenant can pay the rent, if the rent amount is exact, and if the rent goes to the landlord.
-- Security Deposit test: Verify if only the tenant can pay the security deposit, if the security deposit amount is exact, and if it goes to the landlord.
-
-Points of Ambiguity:
-- Date validation: Smart contracts cannot access external data including the current date or time. An oracle would therefore be needed.
-- Lease Extension/Modification: Handling in-code modification or extension of lease could get tricky.
-- Lease Termination: Conditions for lease termination and security deposit refund rules would be complex to enforce on-chain.
-- Discretionary decisions: A legal contract often gives the landlord discretionary power like deciding if the tenant can sublet or if a condition of the lease has been violated. Translating these into code would be difficult since code requires unambiguous, deterministic instructions.
-- State laws: This contract is subject to Florida state laws, which can't be enforced by smart contracts themselves. Enforcement would require external legal and judicial processes.
-
-The developing field of Decentralized Law (e.g. OpenLaw) tries to bridge the gap between legal agreements and smart contracts, potentially offering better tools for this task in the future. Nonetheless, it's recommended to keep the legal agreement and the code as separate entities, but link them via secure, on-chain hashes to maintain the spirit of blockchain's decentralization and security.
+Remember: The terms in Smart Contracts are executed by code and do not have the capacity to interpret the intent behind the original language of legal terms. Legal contracts can have complex, subjective terms and conditions interpreted by the court. But smart contracts execute terms literally. So, the necessary legal advice must be sought before converting a legal contract to a smart contract.
