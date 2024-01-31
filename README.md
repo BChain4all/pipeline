@@ -35,7 +35,7 @@ docker pull trailofbits/eth-security-toolbox
 
 # Linux user
 mkdir ~/slither_shared
-docker run -it -v /home/share:/share trailofbits/eth-security-toolbox
+docker run -it -v /home/share:/share --name slither trailofbits/eth-security-toolbox
 
 # Windows user
 mkdir C:\Users\<user name>\slither_shared
