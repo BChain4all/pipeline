@@ -192,8 +192,8 @@ class Pipeline:
         return gen_smart_contract
     
     @classmethod
-    def pipe(cls, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4", output_path: str = 'output', temperatures = [0.1, 0.5, 0.7, 1, 2],lambda_prompt: None = lambda x: f"x"):
-
+    def pipe(cls, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4", output_path: str = 'output', temperatures = [0, 0.5, 1, 1.5, 2],lambda_prompt: None = lambda x: f"x"):
+        # Temperatures accoding to https://arxiv.org/pdf/2309.08221.pdf
         for file in os.listdir(legal_agreement_path):
             abs_file = os.path.join(legal_agreement_path, file)
             logging.info(f"Processing file '{file}'")
