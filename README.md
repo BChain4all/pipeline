@@ -29,7 +29,7 @@ poetry env use python3.9
 poetry install --only master
 ```
 
-### 2. Install Sliter doker container
+### 2. Install Slither docker container
 ```sh
 docker pull trailofbits/eth-security-toolbox
 
