@@ -1,6 +1,6 @@
 # LLM Smart Contract Creation and Deployment
 
-This project aims to automate the process of creating and deploying smart contracts using LLM based on an external legal contract. The process is as automated as possible to ensure efficiency and accuracy.
+This tool is part of the BChain4all project and aims to automate the process of creating and deploying smart contracts using LLM based on an external legal contract. The process is as automated as possible to ensure efficiency and accuracy.
 
 ## Scripts
 
