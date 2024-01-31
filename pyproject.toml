@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pipeline"
+version = "0.1.0"
+description = "This tool is part of the BChain4all project and aims to automate the process of creating and deploying smart contracts using LLM based on an external legal contract. The process is as automated as possible to ensure efficiency and accuracy."
+authors = ["BChain4All"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+openai = "^1.10.0"
+docker = "^7.0.0"
+tiktoken = "^0.5.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
