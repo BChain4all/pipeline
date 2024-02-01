@@ -1,10 +1,13 @@
 import os
 from openai import OpenAI
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
 import tiktoken
 import logging
 import re
 import json
 import docker
+from .consts import OPENAI, MISTRALAI, GOOGLEAI
 
 # Logging
 
@@ -15,7 +18,8 @@ logging.basicConfig(
 class Pipeline:
     CURR_DIR = os.path.dirname(os.path.realpath(__file__))
     PARENT_DIR = os.path.dirname(CURR_DIR)
-    TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
+    TOKEN_MISTRALAI = os.getenv("MISTRAL_API_KEY")
+    TOKEN_GOOGLEAI = os.getenv("GOOGLE_API_KEY")
 
     # Define vulnerability tools
     VUL_TOOLS = {
@@ -49,7 +53,19 @@ class Pipeline:
             os.makedirs(self.output_dir_vul)
         self.docker_client = docker.from_env()
         self.model = model
-        self.client = OpenAI(api_key = self.TOKEN_OPENAI)
+        if model in OPENAI:
+            self.TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
+            self.client = OpenAI(api_key = self.TOKEN_OPENAI)
+        elif model in MISTRALAI:
+            self.TOKEN_MISTRALAI = os.getenv("MISTRAL_API_KEY")
+            self.client = MistralClient(self.TOKEN_MISTRALAI)
+        elif model in GOOGLEAI:
+            self.TOKEN_GOOGLEAI = os.getenv("GOOGLE_API_KEY")
+            # TODO: Add GoogleAI client
+            # self.client = None
+        else:
+            self.TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
+            self.client = OpenAI(api_key = self.TOKEN_OPENAI)
 
     def run_vulnerability_detection(self, sc_sol: str = None, cmd: list = None):
         """
@@ -116,6 +132,47 @@ class Pipeline:
             json.dump(json_out, ff, indent=4)
         return output.decode('utf-8')
     
+    def __call_openai(self, model:str = 'gpt-4', prompt:str=None, temperature: float = 0.1):
+        """
+        Call OpenAI API
+        :param model: model name
+        :param prompt: prompt
+        :param temperature: temperature
+        :return: response
+        """
+        completions = self.client.chat.completions.create(
+                model=model,
+                temperature=temperature,
+                messages = [
+                    {
+                        'role': 'user',
+                        'content': prompt
+                    }
+                ]
+            )
+        new_code = completions.choices[0].message.content
+        return new_code
+    
+    def __call_mistralai(self, model:str = 'mistral-medium', prompt:str=None, temperature: float = 0.1):
+        """
+        Call MistralAI API
+        :param model: model name
+        :param prompt: prompt
+        :param temperature: temperature (0, 1) # https://docs.mistral.ai/api/
+        :return: response
+        """
+        message = ChatMessage(
+            role='user',
+            content=prompt,
+        )
+        response = self.client.chat(
+            model=model,
+            temperature=temperature,
+            message=message
+        )
+        new_code = response.choices[0].message.content
+        return new_code
+    
     def get_vulns(self, vul_report_file: str):
         """
         Get vulnerability report from vulnerability detection tool
@@ -162,17 +219,15 @@ class Pipeline:
         no_tokens = len(enc.encode(prompt(legal_agreement)))
         logging.info(f"Number of tokens for contract '{legal_agreement_name}': {no_tokens}")
         try:
-            completions = self.client.chat.completions.create(
-                model=self.model,
-                temperature=temperature,
-                messages = [
-                    {
-                        'role': 'user',
-                        'content': prompt(legal_agreement)
-                    }
-                ]
-            )
-            new_code = completions.choices[0].message.content
+            prompt_str = prompt(legal_agreement)
+            if self.model in OPENAI:
+                new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
+            elif self.model in MISTRALAI:
+                new_code = self.__call_mistralai(model=self.model, prompt=prompt_str, temperature=temperature)
+            elif self.model in GOOGLEAI:
+                raise NotImplementedError(f"GoogleAI model '{self.model}' not implemented")
+            else:
+                new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
 
             # Save raw content for evaluation in the output_path folder as <legal agreement name>_raw.txt
             with open(os.path.join(self.output_dir_raw, legal_agreement_name + f'_t{temperature}_raw.txt'), "w") as ff:
