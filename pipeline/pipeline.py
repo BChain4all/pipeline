@@ -1,7 +1,5 @@
 import os
 from openai import OpenAI
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
 import tiktoken
 import logging
 import re
@@ -14,6 +12,11 @@ from .consts import OPENAI, MISTRALAI, GOOGLEAI
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s")
+
+# This import must be here to avoid basiConfig of logging to be set to ERROR only
+# See. https://github.com/mistralai/client-python/blob/f9b006a94cb9a8624e8509dba4a7082a5f001239/src/mistralai/client_base.py#L17
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
 
 class Pipeline:
     CURR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -34,9 +37,7 @@ class Pipeline:
         # Other vulnerability detection tools can be added
     }
 
-    def __init__(self, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4", output_path: str = 'output'):
-        assert os.path.exists(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' does not exist"
-        assert os.listdir(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' is empty"
+    def __init__(self, vul_tool: str = 'slither', model: str = "gpt-4-0125-preview", output_path: str = 'output'):
         self.vul_tool_name = vul_tool
         self.vul_tool = self.VUL_TOOLS[self.vul_tool_name]
         self.output_path = output_path
@@ -137,12 +138,12 @@ class Pipeline:
                 "success": False,
                 "message": output.decode('utf-8')
             }
-
-        with open(os.path.join(self.output_dir_vul, sc_name + '.json'), "w") as ff:
+        self.vul_report_file_path = os.path.join(self.output_dir_vul, sc_name + '.json')
+        with open(self.vul_report_file_path, "w") as ff:
             json.dump(json_out, ff, indent=4)
         return output.decode('utf-8')
     
-    def __call_openai(self, model:str = 'gpt-4', prompt:str=None, temperature: float = 0.1):
+    def __call_openai(self, model:str = 'gpt-4-0125-preview', prompt:str=None, temperature: float = 0.1):
         """
         Call OpenAI API
         :param model: model name
@@ -211,26 +212,26 @@ class Pipeline:
             raise ValueError(f"Vulnerability tool '{self.vul_tool}' not supported")
         return vulns
     
-    def get_smart_contract_from_ai(self, prompt, legal_agreement_path: str, temperature: float = 0.1, overwrite: bool = False):
+    def get_smart_contract_from_ai(self, prompt, legal_agreement_file_path: str, temperature: float = 0.1, overwrite: bool = False):
         """
         Get smart contract from AI
-        :param legal_agreement_path: path to legal agreements
+        :param legal_agreement_file_path: path to legal agreements
         :return: smart contract
         """
         # Get legal agreement
-        assert os.path.exists(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' does not exist"
+        assert os.path.exists(legal_agreement_file_path), f"Given path for legal agreements'{legal_agreement_file_path}' does not exist"
         # Get legal agreement name
-        legal_agreement_name = os.path.basename(legal_agreement_path).split(".")[0]
+        legal_agreement_name = os.path.basename(legal_agreement_file_path).split(".")[0]
         self.ai_response_raw_path = os.path.join(self.output_dir_raw, legal_agreement_name + f'_t{temperature}_raw.txt')
         self.ai_gen_smart_contract_path = os.path.join(self.output_dir_sc, legal_agreement_name + f'_t{temperature}.sol')
 
         # 'overwrite' param needed in order to not waste time and money generating the same smart contract
         if os.path.exists(self.ai_gen_smart_contract_path) and not overwrite:
             logging.info(f"Smart contract already generated for '{legal_agreement_name}'")
-            with open(self.ai_gen_smart_contract_path, "r") as ff:
+            with open(self.ai_gen_smart_contract_path, "r", encoding='utf-8') as ff:
                 gen_smart_contract = ff.read()
         else:
-            with open(legal_agreement_path, 'r') as f:
+            with open(legal_agreement_file_path, 'r') as f:
                 legal_agreement = f.readlines()
             
             try:
@@ -266,22 +267,24 @@ class Pipeline:
         return gen_smart_contract
     
     @classmethod
-    def pipe(cls, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4", output_path: str = 'output', temperatures = [0, 0.5, 1, 1.5, 2],lambda_prompt: None = lambda x: f"x"):
+    def pipe(cls, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4-0125-preview", output_path: str = 'output', temperatures = [0, 0.5, 1, 1.5, 2],lambda_prompt: None = lambda x: f"x"):
         # Temperatures accoding to https://arxiv.org/pdf/2309.08221.pdf
+        assert os.path.exists(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' does not exist"
+        assert os.listdir(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' is empty"
+
         for file in os.listdir(legal_agreement_path):
             abs_file = os.path.join(legal_agreement_path, file)
             logging.info(f"Processing file '{file}'")
             for temperature in temperatures:
                 file_name, _ = os.path.splitext(file)
-                file_sol = file_name + f'_t{temperature}.sol'
 
-                inst = cls(legal_agreement_path, vul_tool, model, os.path.join(output_path, file_name))
-                sc_gen = inst.get_smart_contract_from_ai(lambda_prompt, temperature=temperature, legal_agreement_path=abs_file)
+                inst = cls(vul_tool, model, os.path.join(output_path, file_name))
+                sc_gen = inst.get_smart_contract_from_ai(lambda_prompt, temperature=temperature, legal_agreement_file_path=abs_file)
                 if sc_gen is not None:
                     
-                    inst.run_vulnerability_detection(os.path.join(inst.output_dir_sc, file_sol))
-                    vulns = inst.get_vulns(os.path.join(inst.output_dir_vul, file_sol + '.json'))
-                    logging.debug(f"Vulnerabilities for '{file_sol}':\n{vulns}")
+                    inst.run_vulnerability_detection(inst.ai_gen_smart_contract_path)
+                    vulns = inst.get_vulns(inst.vul_report_file_path)
+                    logging.debug(f"Vulnerabilities for '{inst.ai_gen_smart_contract_path}':\n{vulns}")
                 else:
                     logging.error(f"Smart contract generation failed for '{file}'")
         
