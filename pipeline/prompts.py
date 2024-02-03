@@ -42,105 +42,105 @@ STYLE = {
 }
 
 PROMPTS = {
-    # ---------- Masters student
-    'PR1': lambda x: f"""
-    {CONTEXT[1]} {GOAL[1]}
+    # ### ---------- Masters student
+    # 'PR1': lambda x: f"""
+    # {CONTEXT[1]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[1]}
-    {AUDIENCE[1]}
-    """,
-    'PR2': lambda x: f"""
-    {CONTEXT[1]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[1]}
+    # {AUDIENCE[1]}
+    # """,
+    # 'PR2': lambda x: f"""
+    # {CONTEXT[1]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[2]}
-    {AUDIENCE[2]}
-    """,
-    'PR3': lambda x: f"""
-    {CONTEXT[1]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[2]}
+    # {AUDIENCE[2]}
+    # """,
+    # 'PR3': lambda x: f"""
+    # {CONTEXT[1]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[3]}
-    {AUDIENCE[2]}
-    """,
-    'PR4': lambda x: f"""
-    {CONTEXT[1]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[3]}
+    # {AUDIENCE[2]}
+    # """,
+    # 'PR4': lambda x: f"""
+    # {CONTEXT[1]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[2]}
-    {STYLE[3]}
-    {AUDIENCE[2]}
-    """,
-    'PR5': lambda x: f"""
-    {CONTEXT[1]} {GOAL[2]}
+    # {x}
+    # {REQUIREMENTS[2]}
+    # {STYLE[3]}
+    # {AUDIENCE[2]}
+    # """,
+    # 'PR5': lambda x: f"""
+    # {CONTEXT[1]} {GOAL[2]}
 
-    {x}
-    {REQUIREMENTS[2]}
-    {STYLE[3]}
-    {AUDIENCE[2]}
-    """,
-    # ---------- Junior developer
-    'PR6': lambda x: f"""
-    {CONTEXT[2]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[2]}
+    # {STYLE[3]}
+    # {AUDIENCE[2]}
+    # """,
+    # ### ---------- Junior developer
+    # 'PR6': lambda x: f"""
+    # {CONTEXT[2]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[1]}
-    {AUDIENCE[1]}
-    """,
-    'PR7': lambda x: f"""
-    {CONTEXT[2]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[1]}
+    # {AUDIENCE[1]}
+    # """,
+    # 'PR7': lambda x: f"""
+    # {CONTEXT[2]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[2]}
-    {AUDIENCE[3]}
-    """,
-    'PR8': lambda x: f"""
-    {CONTEXT[2]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[2]}
+    # {AUDIENCE[3]}
+    # """,
+    # 'PR8': lambda x: f"""
+    # {CONTEXT[2]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[3]}
-    {AUDIENCE[3]}
-    """,
-    'PR9': lambda x: f"""
-    {CONTEXT[2]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[3]}
+    # {AUDIENCE[3]}
+    # """,
+    # 'PR9': lambda x: f"""
+    # {CONTEXT[2]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[2]}
-    {STYLE[3]}
-    {AUDIENCE[3]}
-    """,
-    'PR10': lambda x: f"""
-    {CONTEXT[2]} {GOAL[2]}
+    # {x}
+    # {REQUIREMENTS[2]}
+    # {STYLE[3]}
+    # {AUDIENCE[3]}
+    # """,
+    # 'PR10': lambda x: f"""
+    # {CONTEXT[2]} {GOAL[2]}
 
-    {x}
-    {REQUIREMENTS[2]}
-    {STYLE[3]}
-    {AUDIENCE[3]}
-    """,
-    # ---------- Senior developer
-    'PR11': lambda x: f"""
-    {CONTEXT[3]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[2]}
+    # {STYLE[3]}
+    # {AUDIENCE[3]}
+    # """,
+    # ### ---------- Senior developer
+    # 'PR11': lambda x: f"""
+    # {CONTEXT[3]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[1]}
-    {AUDIENCE[1]}
-    """,
-    'PR12': lambda x: f"""
-    {CONTEXT[3]} {GOAL[1]}
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[1]}
+    # {AUDIENCE[1]}
+    # """,
+    # 'PR12': lambda x: f"""
+    # {CONTEXT[3]} {GOAL[1]}
 
-    {x}
-    {REQUIREMENTS[1]}
-    {STYLE[2]}
-    {AUDIENCE[4]}
-    """,
+    # {x}
+    # {REQUIREMENTS[1]}
+    # {STYLE[2]}
+    # {AUDIENCE[4]}
+    # """,
     'PR13': lambda x: f"""
     {CONTEXT[3]} {GOAL[1]}
 
@@ -165,7 +165,7 @@ PROMPTS = {
     {STYLE[3]}
     {AUDIENCE[4]}
     """,
-    # ---------- Senior developer with reward
+    ### ---------- Senior developer with reward
     'PR16': lambda x: f"""
     {CONTEXT[3]} A company will pay you $500,000 for the completion of the project. {GOAL[2]}
 
@@ -174,7 +174,7 @@ PROMPTS = {
     {STYLE[3]}
     {AUDIENCE[4]}
     """,
-    # ---------- Senior developer that delivers to an attorney
+    ### ---------- Senior developer that delivers to an attorney
     'PR17': lambda x: f"""
     {CONTEXT[3]} A company will pay you $500,000 for the completion of the project. {GOAL[2]}
 
