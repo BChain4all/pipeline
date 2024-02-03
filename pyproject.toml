@@ -11,6 +11,8 @@ openai = "^1.10.0"
 docker = "^7.0.0"
 tiktoken = "^0.5.2"
 mistralai = "^0.0.12"
+nltk = "^3.8.1"
+solidity-parser = "^0.1.1"
 
 
 [build-system]
