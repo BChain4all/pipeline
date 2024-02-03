@@ -28,7 +28,8 @@ class Pipeline:
             "docker_image": "trailofbits/eth-security-toolbox",
             "host_path": os.path.join(os.path.expanduser('~'), 'slither_shared' ),
             "container_path": "/share",
-            "cmd": lambda sol_file, pragma: [f"solc-select install {pragma}", f"solc-select use {pragma}", f"slither {sol_file} --json-type console"]
+            "cmd": lambda sol_file, pragma: [f"solc-select install {pragma}", f"solc-select use {pragma}", f"slither {sol_file} --json -"],
+            "cmd_err" : lambda sol_file, pragma: [f"solc-select use {pragma}", f"slither {sol_file}"] # This is the command to run if the last cmd returns a void json. Most likely, the smart contract does not compile
         },
         # Other vulnerability detection tools can be added
     }
@@ -98,10 +99,7 @@ class Pipeline:
         
         # Get pragma 
         pattern = r"(^pragma solidity ).{0,2}(\d\.\d+\.\d+)+"
-        regex = re.search(pattern, sc_txt)
-        # pragma = regex.group(0)[1:-1] if regex.group().startswith('^') else str(regex.group(0)[:-1])
         pragma = re.findall(pattern, sc_txt)[0][1]
-        logging.debug(f"Pragma: {pragma}")
         if int(pragma.split(".")[1]) == 4 and int(pragma.split(".")[2]) < 11:
             pragma = "0.4.11"
         logging.info(f"Pragma: {pragma}")
@@ -111,6 +109,7 @@ class Pipeline:
             path2sc_sol_in_shared_folder = '/'.join([self.vul_tool['container_path'], self.output_path.replace('\\', '/'), 'sc', sc_name])
             logging.info(f"Path to smart contract in shared folder: {path2sc_sol_in_shared_folder}")
             cmd = self.vul_tool['cmd'](path2sc_sol_in_shared_folder, pragma)
+            cmd_err = self.vul_tool['cmd_err'](path2sc_sol_in_shared_folder, pragma)
         
         # Run command
         if isinstance(cmd, list):
@@ -118,6 +117,14 @@ class Pipeline:
                 logging.debug(f"Running command: {c}")
                 _, output = container.exec_run(cmd=c, stdin=True)
                 logging.info(f'Slither output:\n{_}\n{output}')
+            
+            # If the last output is empty, run the command to check if the smart contract compiles 
+            # since the last command did not return a valid JSON
+            if output.decode('utf-8') == '':
+                for c in cmd_err:
+                    logging.debug(f"Compilatin error detected. Running command: {c}")
+                    _, output = container.exec_run(cmd=c, stdin=True)
+                    logging.info(f'Slither output:\n{_}\n{output}')
         else:
             raise ValueError(f"Command must be a list, not {type(cmd)}")
         try:
@@ -126,7 +133,10 @@ class Pipeline:
             # TODO: Most likely, this happends when the smart contract is not compilable
             # Try to catch the error "raise 'InvalidCompilation'..." with regex
             logging.error(f"Error while parsing JSON output:\n{e}")
-            json_out = {"error": output.decode('utf-8')}
+            json_out = {
+                "success": False,
+                "message": output.decode('utf-8')
+            }
 
         with open(os.path.join(self.output_dir_vul, sc_name + '.json'), "w") as ff:
             json.dump(json_out, ff, indent=4)
@@ -189,18 +199,19 @@ class Pipeline:
             else:
                 # If vulnerability detectioin tool fails, return the error.
                 # Commonly, this happens when the pragma is not supported or the smart contract does not compile
+                pattern_not_compilable = r'InvalidCompilation: (.*)'
                 logging.error(f"Slither execution failed:\n\n{vulns_raw}")
                 vulns = [{
                         "impact":"High",
                         "confidence":"High",
-                        "description": vulns_raw["error"].replace("\n", "")
+                        "description": re.findall(pattern_not_compilable, vulns_raw["message"], re.DOTALL)
                         }]
         # Add `elif` with other vulnerability detection tools (i.e., Mythril)
         else:
             raise ValueError(f"Vulnerability tool '{self.vul_tool}' not supported")
         return vulns
     
-    def get_smart_contract_from_ai(self, prompt, legal_agreement_path: str, temperature: float = 0.1):
+    def get_smart_contract_from_ai(self, prompt, legal_agreement_path: str, temperature: float = 0.1, overwrite: bool = False):
         """
         Get smart contract from AI
         :param legal_agreement_path: path to legal agreements
@@ -208,41 +219,49 @@ class Pipeline:
         """
         # Get legal agreement
         assert os.path.exists(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' does not exist"
-
         # Get legal agreement name
         legal_agreement_name = os.path.basename(legal_agreement_path).split(".")[0]
-        with open(legal_agreement_path, 'r') as f:
-            legal_agreement = f.readlines()
-        
-        # Verify if the prompt exceedes the maximum number of tokens
-        enc = tiktoken.encoding_for_model(self.model)
-        no_tokens = len(enc.encode(prompt(legal_agreement)))
-        logging.info(f"Number of tokens for contract '{legal_agreement_name}': {no_tokens}")
-        try:
-            prompt_str = prompt(legal_agreement)
-            if self.model in OPENAI:
-                new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
-            elif self.model in MISTRALAI:
-                new_code = self.__call_mistralai(model=self.model, prompt=prompt_str, temperature=temperature)
-            elif self.model in GOOGLEAI:
-                raise NotImplementedError(f"GoogleAI model '{self.model}' not implemented")
-            else:
-                new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
+        self.ai_response_raw_path = os.path.join(self.output_dir_raw, legal_agreement_name + f'_t{temperature}_raw.txt')
+        self.ai_gen_smart_contract_path = os.path.join(self.output_dir_sc, legal_agreement_name + f'_t{temperature}.sol')
 
-            # Save raw content for evaluation in the output_path folder as <legal agreement name>_raw.txt
-            with open(os.path.join(self.output_dir_raw, legal_agreement_name + f'_t{temperature}_raw.txt'), "w") as ff:
-                ff.write(new_code)
-
-            logging.debug(f"NEW CODE: {new_code}")
+        # 'overwrite' param needed in order to not waste time and money generating the same smart contract
+        if os.path.exists(self.ai_gen_smart_contract_path) and not overwrite:
+            logging.info(f"Smart contract already generated for '{legal_agreement_name}'")
+            with open(self.ai_gen_smart_contract_path, "r") as ff:
+                gen_smart_contract = ff.read()
+        else:
+            with open(legal_agreement_path, 'r') as f:
+                legal_agreement = f.readlines()
             
-            code_only_pattern = r"pragma solidity.*}"
-            gen_smart_contract = re.search(code_only_pattern, new_code, re.DOTALL).group(0)
-            # Save the file with the new Solidity code (hopefully) provided by ChatGPT
-            with open(os.path.join(self.output_dir_sc, legal_agreement_name + f'_t{temperature}.sol'), "w") as ff:
-                ff.write(gen_smart_contract)
-        except Exception as e:
-            logging.error(f"Error while generating smart contract for '{legal_agreement_name}':\n{e}")
-            gen_smart_contract = None
+            try:
+                prompt_str = prompt(legal_agreement)
+                # Verify if the prompt exceedes the maximum number of tokens
+                enc = tiktoken.encoding_for_model(self.model)
+                no_tokens = len(enc.encode(prompt(legal_agreement)))
+                logging.info(f"Number of tokens for prompt: {no_tokens}")
+                if self.model in OPENAI:
+                    new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
+                elif self.model in MISTRALAI:
+                    new_code = self.__call_mistralai(model=self.model, prompt=prompt_str, temperature=temperature)
+                elif self.model in GOOGLEAI:
+                    raise NotImplementedError(f"GoogleAI model '{self.model}' not implemented")
+                else:
+                    new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
+
+                # Save raw content for evaluation in the output_path folder as <legal agreement name>_raw.txt
+                with open(self.ai_response_raw_path, "w") as ff:
+                    ff.write(new_code)
+
+                logging.debug(f"NEW CODE: {new_code}")
+                
+                code_only_pattern = r"pragma solidity.*}"
+                gen_smart_contract = re.search(code_only_pattern, new_code, re.DOTALL).group(0)
+                # Save the file with the new Solidity code (hopefully) provided by ChatGPT
+                with open(self.ai_gen_smart_contract_path, "w") as ff:
+                    ff.write(gen_smart_contract)
+            except Exception as e:
+                logging.error(f"Error while generating smart contract for '{legal_agreement_name}':\n{e}")
+                gen_smart_contract = None
 
         return gen_smart_contract
     
@@ -257,12 +276,12 @@ class Pipeline:
                 file_sol = file_name + f'_t{temperature}.sol'
 
                 inst = cls(legal_agreement_path, vul_tool, model, os.path.join(output_path, file_name))
-                # sc_gen = 'ok'
                 sc_gen = inst.get_smart_contract_from_ai(lambda_prompt, temperature=temperature, legal_agreement_path=abs_file)
                 if sc_gen is not None:
                     
                     inst.run_vulnerability_detection(os.path.join(inst.output_dir_sc, file_sol))
-                    inst.get_vulns(os.path.join(inst.output_dir_vul, file_sol + '.json'))
+                    vulns = inst.get_vulns(os.path.join(inst.output_dir_vul, file_sol + '.json'))
+                    logging.debug(f"Vulnerabilities for '{file_sol}':\n{vulns}")
                 else:
                     logging.error(f"Smart contract generation failed for '{file}'")
         
