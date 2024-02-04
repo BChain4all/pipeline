@@ -21,7 +21,7 @@ class SmartCMetrics:
     - number of functions [OK]
     - number of functions whose logic is fully defined
     - presence of comments [OK]
-    - presence of external calls [OK]
+    - presence of external calls []
     - availability of value for parameters [OK]
     - BLEU score (if a reference is available)
     - CodeBLEU score (if a reference is available)
@@ -170,7 +170,7 @@ class SmartCMetrics:
         return self.__get_no_param_with_initial_value()
     
     @property
-    def no_external_calls(self):
+    def external_calls(self):
         return self.__get_external_calls()
     
     @property
