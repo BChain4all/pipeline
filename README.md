@@ -45,6 +45,10 @@ docker run -it -v C:\Users\<user name>\slither_shared:/share --name slither trai
 ### 3. OpenAI API Key
 Set OpenAI API key as environmental variable named `OPENAI_API_KEY`.
 
+### 4. Brownie framework 
+
+In order to use the Brownie framework, [Ganache](https://github.com/trufflesuite/ganache) must be installed. Follow the instruction [here](https://eth-brownie.readthedocs.io/en/stable/install.html).
+
 ## Scripts
 
 There are two main scripts involved in this process:
