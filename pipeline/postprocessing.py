@@ -22,7 +22,7 @@ class SmartCMetrics:
     - number of functions whose logic is fully defined
     - presence of comments [OK]
     - presence of external calls
-    - availability of value for parameters
+    - availability of value for parameters [OK]
     - BLEU score (if a reference is available)
     - CodeBLEU score (if a reference is available)
     """
@@ -152,6 +152,22 @@ class SmartCMetrics:
     @property
     def vul_summary(self):
         return self.__get_vul_summary()
+
+    @property
+    def get_parsed_sol(self):
+        return self.__parsed_sol
+    
+    @property
+    def get_parsed_obj(self):
+        return self.__parsed_obj
+    
+    @property
+    def param_with_initial_value(self):
+        return self.__get_param_with_initial_value()
+    
+    @property
+    def no_param_with_initial_value(self):
+        return self.__get_no_param_with_initial_value()
     
     @staticmethod
     def remove_comments(string):
@@ -262,7 +278,7 @@ class SmartCMetrics:
         if self.vul_tool_name == "slither":
             if vulns_raw.get("results", {}).get("detectors", False):
                 vulns = {
-                    'compilable': vulns_raw['compilable'],
+                    'compilable': True,
                     'vulns': list(map(lambda x: {key: x[key] for key in ["description", "check", "impact", "confidence","first_markdown_element"]}, 
                                   vulns_raw["results"]["detectors"]))
                 }
@@ -291,3 +307,9 @@ class SmartCMetrics:
             key = (item['check'], item['confidence'], item['impact'])
             occurrences[key] = occurrences.get(key, 0) + 1
         return occurrences
+    
+    def __get_param_with_initial_value(self):
+        return [_['variables'][0]['name'] for _ in self.get_parsed_sol['children'][1]['subNodes'] if _.get('initialValue', None) is not None]
+    
+    def __get_no_param_with_initial_value(self):
+        return len(self.__get_param_with_initial_value())
