@@ -1,5 +1,6 @@
 import os
 from openai import OpenAI
+from pprint import pformat
 import tiktoken
 import logging
 import re
@@ -24,22 +25,7 @@ class Pipeline:
     TOKEN_MISTRALAI = os.getenv("MISTRAL_API_KEY")
     TOKEN_GOOGLEAI = os.getenv("GOOGLE_API_KEY")
 
-    # Define vulnerability tools
-    VUL_TOOLS = {
-        "slither": {
-            "docker_name": "slither",
-            "docker_image": "trailofbits/eth-security-toolbox",
-            "host_path": os.path.join(os.path.expanduser('~'), 'slither_shared' ),
-            "container_path": "/share",
-            "cmd": lambda sol_file, pragma: [f"solc-select install {pragma}", f"solc-select use {pragma}", f"slither {sol_file} --json -"],
-            "cmd_err" : lambda sol_file, pragma: [f"solc-select use {pragma}", f"slither {sol_file}"] # This is the command to run if the last cmd returns a void json. Most likely, the smart contract does not compile
-        },
-        # Other vulnerability detection tools can be added
-    }
-
-    def __init__(self, vul_tool: str = 'slither', model: str = "gpt-4-0125-preview", output_path: str = 'output'):
-        self.vul_tool_name = vul_tool
-        self.vul_tool = self.VUL_TOOLS[self.vul_tool_name]
+    def __init__(self, model: str = "gpt-4-0125-preview", output_path: str = 'output'):
         self.output_path = output_path
         self.output_dir = os.path.join(self.vul_tool['host_path'], output_path)
         self.output_dir_raw = os.path.join(self.output_dir, "raw")
@@ -68,80 +54,6 @@ class Pipeline:
         else:
             self.TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
             self.client = OpenAI(api_key = self.TOKEN_OPENAI)
-
-    def run_vulnerability_detection(self, sc_sol: str = None, cmd: list = None):
-        """
-        Run vulnerability detection tool on given smart contract
-        :param cmd: command to run vulnerability detection tool
-        :return: vulnerability report
-        """
-
-        # Get docker container instance, else create it
-        try:
-            container = self.docker_client.containers.get(self.vul_tool['docker_name'])
-        except Exception as e:
-
-            container = self.docker_client.containers.run(
-                image=self.vul_tool['docker_image'],
-                detach=True,
-                name=self.vul_tool['docker_name'],
-                volumes= {self.vul_tool['host_path']: {'bind': self.vul_tool['container_path'], 'mode': 'rw'}}
-            )
-
-        if container.status != 'running':
-            logging.debug(f"Container {self.vul_tool['docker_name']} is not running. Starting it...")
-            container.start()
-            logging.info(f"Container {self.vul_tool['docker_name']} started.")
-
-        # Get smart contract solidity file
-        sc_name = os.path.basename(sc_sol)
-        with open(sc_sol, 'r') as f:
-            sc_txt = f.read()
-        
-        # Get pragma 
-        pattern = r"(^pragma solidity ).{0,2}(\d\.\d+\.\d+)+"
-        pragma = re.findall(pattern, sc_txt)[0][1]
-        if int(pragma.split(".")[1]) == 4 and int(pragma.split(".")[2]) < 11:
-            pragma = "0.4.11"
-        logging.info(f"Pragma: {pragma}")
-
-        # Run vulnerability detection tool
-        if cmd is None:
-            path2sc_sol_in_shared_folder = '/'.join([self.vul_tool['container_path'], self.output_path.replace('\\', '/'), 'sc', sc_name])
-            logging.info(f"Path to smart contract in shared folder: {path2sc_sol_in_shared_folder}")
-            cmd = self.vul_tool['cmd'](path2sc_sol_in_shared_folder, pragma)
-            cmd_err = self.vul_tool['cmd_err'](path2sc_sol_in_shared_folder, pragma)
-        
-        # Run command
-        if isinstance(cmd, list):
-            for c in cmd:
-                logging.debug(f"Running command: {c}")
-                _, output = container.exec_run(cmd=c, stdin=True)
-                logging.info(f'Slither output:\n{_}\n{output}')
-            
-            # If the last output is empty, run the command to check if the smart contract compiles 
-            # since the last command did not return a valid JSON
-            if output.decode('utf-8') == '':
-                for c in cmd_err:
-                    logging.debug(f"Compilatin error detected. Running command: {c}")
-                    _, output = container.exec_run(cmd=c, stdin=True)
-                    logging.info(f'Slither output:\n{_}\n{output}')
-        else:
-            raise ValueError(f"Command must be a list, not {type(cmd)}")
-        try:
-            json_out = json.loads(output.decode('utf-8'))
-        except Exception as e:
-            # TODO: Most likely, this happends when the smart contract is not compilable
-            # Try to catch the error "raise 'InvalidCompilation'..." with regex
-            logging.error(f"Error while parsing JSON output:\n{e}")
-            json_out = {
-                "success": False,
-                "message": output.decode('utf-8')
-            }
-        self.vul_report_file_path = os.path.join(self.output_dir_vul, sc_name + '.json')
-        with open(self.vul_report_file_path, "w") as ff:
-            json.dump(json_out, ff, indent=4)
-        return output.decode('utf-8')
     
     def __call_openai(self, model:str = 'gpt-4-0125-preview', prompt:str=None, temperature: float = 0.1):
         """
@@ -183,34 +95,6 @@ class Pipeline:
         )
         new_code = response.choices[0].message.content
         return new_code
-    
-    def get_vulns(self, vul_report_file: str):
-        """
-        Get vulnerability report from vulnerability detection tool
-        :param cmd: command to run vulnerability detection tool
-        :return: vulnerability report
-        """
-        with open(vul_report_file, "r") as ff:
-            vulns_raw = json.load(ff)
-        if self.vul_tool_name == "slither":
-            if vulns_raw.get("results", {}).get("detectors", False):
-                vulns = list(map(lambda x: {key: x[key] for key in ["description", "check", "impact", "confidence","first_markdown_element"]}, 
-                                 vulns_raw["results"]["detectors"]))
-                logging.debug(vulns_raw)
-            else:
-                # If vulnerability detectioin tool fails, return the error.
-                # Commonly, this happens when the pragma is not supported or the smart contract does not compile
-                pattern_not_compilable = r'InvalidCompilation: (.*)'
-                logging.error(f"Slither execution failed:\n\n{vulns_raw}")
-                vulns = [{
-                        "impact":"High",
-                        "confidence":"High",
-                        "description": re.findall(pattern_not_compilable, vulns_raw["message"], re.DOTALL)
-                        }]
-        # Add `elif` with other vulnerability detection tools (i.e., Mythril)
-        else:
-            raise ValueError(f"Vulnerability tool '{self.vul_tool}' not supported")
-        return vulns
     
     def get_smart_contract_from_ai(self, prompt, legal_agreement_file_path: str, temperature: float = 0.1, overwrite: bool = False):
         """
@@ -280,11 +164,5 @@ class Pipeline:
 
                 inst = cls(vul_tool, model, os.path.join(output_path, file_name))
                 sc_gen = inst.get_smart_contract_from_ai(lambda_prompt, temperature=temperature, legal_agreement_file_path=abs_file)
-                if sc_gen is not None:
-                    
-                    inst.run_vulnerability_detection(inst.ai_gen_smart_contract_path)
-                    vulns = inst.get_vulns(inst.vul_report_file_path)
-                    logging.debug(f"Vulnerabilities for '{inst.ai_gen_smart_contract_path}':\n{vulns}")
-                else:
-                    logging.error(f"Smart contract generation failed for '{file}'")
+                logging.debug(f"Smart contract generated for '{file}':\n{pformat(sc_gen)}")
         
