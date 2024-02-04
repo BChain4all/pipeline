@@ -221,7 +221,7 @@ class SmartCMetrics:
             sc_txt = f.read()
         
         # Get pragma 
-        pattern = r"(^pragma solidity ).{0,2}(\d\.\d+\.\d+)+"
+        pattern = r"(pragma solidity ).{0,2}(\d\.\d+\.\d+)+"
         pragma = re.findall(pattern, sc_txt)[0][1]
         if int(pragma.split(".")[1]) == 4 and int(pragma.split(".")[2]) < 11:
             pragma = "0.4.11"
@@ -309,7 +309,45 @@ class SmartCMetrics:
         return occurrences
     
     def __get_param_with_initial_value(self):
-        return [_['variables'][0]['name'] for _ in self.get_parsed_sol['children'][1]['subNodes'] if _.get('initialValue', None) is not None]
+        valued_param = []
+        for item in self.get_parsed_sol['children']:
+            if item.get('subNodes', None) is not None:
+                for subnode in item['subNodes']:
+                    if subnode.get('name', '') == 'constructor':
+                        for statement in subnode['body']['statements']:
+                            if statement['type'] == 'ExpressionStatement':
+                                left = statement['expression']['left']['name']
+                                right_type = statement['expression']['right']['type']
+                                if right_type == 'NumberLiteral':
+                                    right = statement['expression']['right']['number']
+                                elif right_type == 'BooleanLiteral':
+                                    right = statement['expression']['right']['value']
+                                elif right_type == 'stringLiteral':
+                                    right = statement['expression']['right']['value']
+                                elif right_type == 'BinaryOperation':
+                                    right = statement['expression']['right']['number'] if statement['expression']['right']['type'] == 'NumberLiteral' else statement['expression']['right']['value']
+                                elif right_type == 'FunctionCall':
+                                    right = [statement['expression']['right']['expression']['name']] + [arg['number'] if arg['type'] == 'NumberLiteral' else arg['value'] 
+                                                                                                        for arg in statement['expression']['right']['arguments']]
+                                elif right_type =='TupleExpression':
+                                    try:
+                                        right = [arg['number'] if arg['type'] == 'NumberLiteral' else arg['value']
+                                                for arg in statement['expression']['right']['components']]
+                                    except Exception as e:
+                                        # Fails if in the TupleExpression there is a function call
+                                        logging.error(f"Error while parsing valued parameters: {e}")
+                                        right = []
+                                else:
+                                    right = None
+                                valued_param.append((left, right))
+        return valued_param
     
     def __get_no_param_with_initial_value(self):
-        return len(self.__get_param_with_initial_value())
+        count = 0
+        for param in self.__get_param_with_initial_value():
+            if param[1] is not None:
+                count += 1
+        return count
+    
+    def __get_external_calls(self):
+        pass
