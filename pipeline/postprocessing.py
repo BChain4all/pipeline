@@ -21,7 +21,7 @@ class SmartCMetrics:
     - number of functions [OK]
     - number of functions whose logic is fully defined
     - presence of comments [OK]
-    - presence of external calls
+    - presence of external calls [OK]
     - availability of value for parameters [OK]
     - BLEU score (if a reference is available)
     - CodeBLEU score (if a reference is available)
@@ -168,6 +168,14 @@ class SmartCMetrics:
     @property
     def no_param_with_initial_value(self):
         return self.__get_no_param_with_initial_value()
+    
+    @property
+    def no_external_calls(self):
+        return self.__get_external_calls()
+    
+    @property
+    def no_external_calls(self):
+        return self.__get_no_external_calls()
     
     @staticmethod
     def remove_comments(string):
@@ -350,4 +358,8 @@ class SmartCMetrics:
         return count
     
     def __get_external_calls(self):
-        pass
+        # If there are any imports, the smart contract has external calls
+        return self.__parsed_obj.imports
+    
+    def __get_no_external_calls(self):
+        return len(self.__get_external_calls())
