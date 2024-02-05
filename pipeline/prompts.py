@@ -133,14 +133,14 @@ PROMPTS = {
     # {STYLE[1]}
     # {AUDIENCE[1]}
     # """,
-    # 'PR12': lambda x: f"""
-    # {CONTEXT[3]} {GOAL[1]}
+    'PR12': lambda x: f"""
+    {CONTEXT[3]} {GOAL[1]}
 
-    # {x}
-    # {REQUIREMENTS[1]}
-    # {STYLE[2]}
-    # {AUDIENCE[4]}
-    # """,
+    {x}
+    {REQUIREMENTS[1]}
+    {STYLE[2]}
+    {AUDIENCE[4]}
+    """,
     'PR13': lambda x: f"""
     {CONTEXT[3]} {GOAL[1]}
 
