@@ -4,7 +4,6 @@ from pprint import pformat
 import tiktoken
 import logging
 import re
-import json
 import docker
 from .consts import OPENAI, MISTRALAI, GOOGLEAI
 
@@ -151,7 +150,7 @@ class Pipeline:
         return gen_smart_contract
     
     @classmethod
-    def pipe(cls, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4-0125-preview", output_path: str = 'output', temperatures = [0, 0.5, 1, 1.5, 2],lambda_prompt: None = lambda x: f"x"):
+    def pipe(cls, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4-0125-preview", output_path: str = 'output', temperatures = [0.0, 0.5, 1, 1.5, 2],lambda_prompt: None = lambda x: f"x"):
         # Temperatures accoding to https://arxiv.org/pdf/2309.08221.pdf
         assert os.path.exists(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' does not exist"
         assert os.listdir(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' is empty"
