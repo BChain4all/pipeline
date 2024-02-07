@@ -196,6 +196,14 @@ class SmartCMetrics:
     def get_pragma(self):
         return self.__pragma
     
+    @property
+    def vul_count(self):
+        return self.__get_vul_count()
+
+    @property 
+    def pragma(self):
+        return self.__pragma
+    
     @staticmethod
     def remove_comments(string):
         pattern = r"(\".*?\"|\'.*?\')|(/\*.*?\*/|//[^\r\n]*$)"
@@ -344,6 +352,24 @@ class SmartCMetrics:
                 ('Compilation error', 'High', 'High'): 1
             }
         return occurrences
+    
+    def __get_vul_count(self):
+        to_return = {
+                'high': 0,
+                'medium': 0,
+                'low': 0
+            }
+        if self.__vul_report['compilable']:
+            occurrences = self.__get_vul_summary()
+            for key, val in occurrences.items():
+                check, conf, impact = key
+                if impact == 'High':
+                    to_return['high'] += val
+                elif impact == 'Medium':
+                    to_return['medium'] += val
+                elif impact == 'Low':
+                    to_return['low'] += val
+            return to_return
 
     def __get_param_with_initial_value(self):
         # Execute the function only if the smart contract is compilable
@@ -388,10 +414,11 @@ class SmartCMetrics:
         return {
             'compilable': sc.is_compilable,
             'name': sc.file_name,
-            'pragma': sc.get_pragma,
+            'pragma': sc.pragma,
             'temperature': re.findall(r"_t(.*).sol", sc.file_name)[0] if re.findall(r"_t(.*).sol", sc.file_name) else 'N/A',
             'vul_report': sc.vul_report,
             'vul_summary': sc.vul_summary,
+            'vul_count': sc.vul_count,
             'no_contracts': sc.no_contracts if sc.is_compilable else None,
             'no_functions': sc.no_functions if sc.is_compilable else None,
             'no_functions_per_contract': sc.no_functions_per_contract if sc.is_compilable else None,
