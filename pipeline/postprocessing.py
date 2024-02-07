@@ -378,8 +378,9 @@ class SmartCMetrics:
             for contract in self.__contracts:
                 nodes = self.__abi[f'<stdin>:{contract}']['ast']['nodes'][1]['nodes']
                 for node in nodes:
-                    if node.get('constant', False):
-                        valued_param[contract].append((node['name'], node['value']['value']))
+                    # if node.get('constant', False):
+                    if node.get('name', False):
+                        valued_param[contract].append((node['name'], node['value']['value'] if node.get('value', False) else None))
             return valued_param
         return {}
     
@@ -388,7 +389,9 @@ class SmartCMetrics:
         if self.__vul_report['compilable']:
             valued_param = self.__get_param_with_initial_value()
             for contract, valued_list in valued_param.items():
-                count += len(valued_list)
+                for name, value in valued_list:
+                    if value is not None:
+                        count += 1
         return count
     
     @staticmethod
