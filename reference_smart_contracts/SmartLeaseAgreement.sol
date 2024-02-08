@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract SmartLeaseAgreement is ReentrancyGuard  {
 
@@ -28,6 +28,17 @@ contract SmartLeaseAgreement is ReentrancyGuard  {
     uint256 public leaseStart;
     uint256 public leaseEnd;
     uint256 public rentDueDate;
+
+    // Define a struct to hold all the information if you prefer structured data
+    struct LeaseInfo {
+        address landlord;
+        address tenant;
+        string writtenContractIpfsHash;
+        address contractAddress;
+        uint256 leaseStart;
+        uint256 leaseEnd;
+        uint256 duePayDay;
+    }
 
     modifier onlyLandlord() {
         require(msg.sender == landlord, "Only the landlord can perform this action.");
@@ -125,32 +136,17 @@ contract SmartLeaseAgreement is ReentrancyGuard  {
         emit RentPaied(currentMonth, tenant);
     }
 
-    function getLandlord() public view returns (address) {
-        return landlord;    //it returns the public address of the landlord
-    }
-
-    function getTenant() public view returns (address) {
-        return tenant;   //it returns the public address of the tenant
-    }
-
-    function getWrittenContractIpfsHash() public view returns (string memory){
-        return writtenContractIpfsHash;
-    }
-
-    function getContractAddress() public view returns (address) {
-        return address(this); //return the new address after deployment
-    }
-
-    function getLeaseStart() public view returns (uint256){
-        return leaseStart;
-    }
-
-    function getLeaseEnd() public view returns (uint256){
-        return leaseEnd;
-    }
-
-    function getDuePayDay() public view returns (uint256){
-        return duePayDay;
+    // Or if you prefer to use the struct
+    function getAllInfoStructured() public view returns (LeaseInfo memory) {
+        return LeaseInfo(
+            landlord,
+            tenant,
+            writtenContractIpfsHash,
+            address(this),
+            leaseStart,
+            leaseEnd,
+            duePayDay
+        );
     }
 
 }
