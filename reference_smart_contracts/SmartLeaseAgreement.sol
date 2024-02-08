@@ -17,9 +17,9 @@ contract SmartLeaseAgreement is ReentrancyGuard  {
     address payable public landlord;
     address payable public tenant;
     string public writtenContractIpfsHash;
-    uint256 public rentAmount = 1000 wei;
-    uint256 public lateFee = 200 wei;
-    uint256 public securityDeposit = 2000 wei;
+    uint256 public rentAmount = 850; // in USD
+    uint256 public lateFee = 200; // in USD
+    uint256 public securityDeposit = 1700; // in USD
     bool public isDepositPaid = false;
     uint256 public duePayDay = 5 days;
     uint256 public finalPaimentDueDate = 15 days;
