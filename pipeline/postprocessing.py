@@ -80,7 +80,7 @@ class SmartCMetrics:
         self.__path2sol_ref = path2sol_ref
 
         if self.is_compilable:
-            self.__abi = solcx.compile_source(self.__sol_code, solc_version=self.__pragma, base_path=os.path.dirname(self.__path2sol)) 
+            self.__abi = solcx.compile_source(self.__sol_code, solc_version=self.__pragma) 
             # Parse the generated smart contract
             self.__functions_per_contract = {contract: [abi_item['name'] for abi_item in self.__abi[f"<stdin>:{contract}"]['abi'] if abi_item.get('type', False) == 'function']
                                             for contract in self.__contracts}
@@ -497,52 +497,58 @@ class SmartCMetrics:
         # \---output
         #     |   
         #     +---<LLM model name>
-        #     |    +---<prompt key>
-        #     |    |   |   
-        #     |    |   +---<legal agreement name>
-        #     |    |   |    +---raw
-        #     |    |   |    |       <legal agreement name>_t<temperature value>_raw.txt
-        #     |    |   |    |       .
-        #     |    |   |    |       .
-        #     |    |   |    |       
-        #     |    |   |    +---sc
-        #     |    |   |    |       <legal agreement name>_t<temperature value>.sol
-        #     |    |   |    |       .
-        #     |    |   |    |       .
-        #     |    |   |    |       
-        #     |    |   |    \---vul
-        #     .    .   .
+        #     |   +---<n_iter>
+        #     |   |     +---<prompt key>
+        #     |   |     |   |   
+        #     |   |     |   +---<legal agreement name>
+        #     |   |     |   |    +---raw
+        #     |   |     |   |    |       <legal agreement name>_t<temperature value>_raw.txt
+        #     |   |     |   |    |       .
+        #     |   |     |   |    |       .
+        #     |   |     |   |    |       
+        #     |   |     |   |    +---sc
+        #     |   |     |   |    |       <legal agreement name>_t<temperature value>.sol
+        #     |   |     |   |    |       .
+        #     |   |     |   |    |       .
+        #     |   |     |   |    |       
+        #     |   |     |   |    \---vul
+        #     .   .     .   .
 
         for model_name_path in os.listdir(pipe_output_path):
             model_path = os.path.join(pipe_output_path, model_name_path)
             logging.info("=====================================")
             logging.info(f"Model path: {model_path}")
-            to_pandas = []
             if os.path.isdir(model_path):
-                for prompt_name_path in os.listdir(model_path):
-                    prompt_path = os.path.join(model_path, prompt_name_path)
-                    logging.info(f"    -> Prompt path: {prompt_path}")
-                    if os.path.isdir(prompt_path):
-                        for legal_agreement_name_path in os.listdir(prompt_path):
-                            legal_agreement_path = os.path.join(prompt_path, legal_agreement_name_path)
-                            logging.info(f"        -> Legal agreement name path: {legal_agreement_path}")
-                            if os.path.isdir(legal_agreement_path):
-                                legal_agreement_sc_path = os.path.join(legal_agreement_path, 'sc')
-                                for sol_name_path in os.listdir(legal_agreement_sc_path):
-                                    sol_path = os.path.join(legal_agreement_sc_path, sol_name_path)
-                                    logging.info(f"            -> Smart contract path: {sol_path}")
-                                    if os.path.isfile(sol_path):
-                                        sc_sol_metrics = SmartCMetrics.get_sc_metrics(sol_path, vul_tool, path2sol_ref)
-                                        sc_sol_metrics.update({'prompt': prompt_name_path})
-                                        sc_sol_metrics.update({'legal_agreement': legal_agreement_name_path})
-                                        to_pandas.append(sc_sol_metrics)
+                for n_test_name in os.listdir(model_path):
+                    n_test_path = os.path.join(model_path, n_test_name)
+                    logging.info(f"    -> n_test path: {n_test_path}")
+                    to_pandas = []
+                    if os.path.isdir(n_test_path):
+                        for prompt_name_path in os.listdir(n_test_path):
+                            prompt_path = os.path.join(n_test_path, prompt_name_path)
+                            logging.info(f"        -> Prompt path: {prompt_path}")
+                            if os.path.isdir(prompt_path):
+                                for legal_agreement_name_path in os.listdir(prompt_path):
+                                    legal_agreement_path = os.path.join(prompt_path, legal_agreement_name_path)
+                                    logging.info(f"            -> Legal agreement name path: {legal_agreement_path}")
+                                    if os.path.isdir(legal_agreement_path):
+                                        legal_agreement_sc_path = os.path.join(legal_agreement_path, 'sc')
+                                        for sol_name_path in os.listdir(legal_agreement_sc_path):
+                                            sol_path = os.path.join(legal_agreement_sc_path, sol_name_path)
+                                            logging.info(f"                -> Smart contract path: {sol_path}")
+                                            if os.path.isfile(sol_path):
+                                                sc_sol_metrics = SmartCMetrics.get_sc_metrics(sol_path, vul_tool, path2sol_ref)
+                                                sc_sol_metrics.update({'prompt': prompt_name_path})
+                                                sc_sol_metrics.update({'legal_agreement': legal_agreement_name_path})
+                                                to_pandas.append(sc_sol_metrics)
+                                            else:
+                                                logging.warning(f"                ->Path '{sol_path}' is not a file")
                                     else:
-                                        logging.warning(f"            ->Path '{sol_path}' is not a file")
-                            else:
-                                logging.warning(f"        -> Path '{legal_agreement_path}' is not a directory")
-                data = pd.DataFrame(to_pandas)
-                if not data.empty:
-                    logging.info(f"        -> Metrics:{data}")
-                    data.set_index(['prompt', 'legal_agreement'], inplace=True)
-                    data.to_excel(os.path.join(model_path, f'sc_metrics_{model_name_path}.xlsx'), index=True, header=True)
-                    logging.info(f"        -> Metrics saved to {os.path.join(model_path, f'sc_metrics_{model_name_path}.xlsx')}")
+                                        logging.warning(f"            -> Path '{legal_agreement_path}' is not a directory")
+                    data = pd.DataFrame(to_pandas)
+                    if not data.empty:
+                        logging.info(f"        -> Metrics:{data}")
+                        data.set_index(['prompt', 'legal_agreement'], inplace=True)
+                        where_to_save = os.path.join(model_path, f'sc_metrics_{model_name_path}_{n_test_name}.xlsx')
+                        data.to_excel(where_to_save, index=True, header=True)
+                        logging.info(f"        -> Metrics saved to {where_to_save}")
