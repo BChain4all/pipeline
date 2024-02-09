@@ -4,8 +4,8 @@ from pprint import pformat
 import tiktoken
 import logging
 import re
-import docker
 from .consts import OPENAI, MISTRALAI, GOOGLEAI
+import google.generativeai as genai 
 
 # Logging
 
@@ -26,7 +26,8 @@ class Pipeline:
 
     def __init__(self, model: str = "gpt-4-0125-preview", output_path: str = 'output'):
         self.output_path = output_path
-        self.output_dir = os.path.join(self.vul_tool['host_path'], output_path)
+        self.model = model
+        self.output_dir = os.path.join(os.path.join(os.path.expanduser('~'), 'slither_shared'), output_path)
         self.output_dir_raw = os.path.join(self.output_dir, "raw")
         self.output_dir_sc = os.path.join(self.output_dir, "sc")
         self.output_dir_vul = os.path.join(self.output_dir, "vul")
@@ -38,7 +39,6 @@ class Pipeline:
             os.makedirs(self.output_dir_sc)
         if not os.path.exists(self.output_dir_vul):
             os.makedirs(self.output_dir_vul)
-        self.docker_client = docker.from_env()
         self.model = model
         if model in OPENAI:
             self.TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
@@ -48,8 +48,8 @@ class Pipeline:
             self.client = MistralClient(self.TOKEN_MISTRALAI)
         elif model in GOOGLEAI:
             self.TOKEN_GOOGLEAI = os.getenv("GOOGLE_API_KEY")
-            # TODO: Add GoogleAI client
-            # self.client = None
+            genai.configure(api_key=self.TOKEN_GOOGLEAI,)
+            self.client = genai.GenerativeModel(model_name=model)
         else:
             self.TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
             self.client = OpenAI(api_key = self.TOKEN_OPENAI)
@@ -83,17 +83,32 @@ class Pipeline:
         :param temperature: temperature (0, 1) # https://docs.mistral.ai/api/
         :return: response
         """
-        message = ChatMessage(
-            role='user',
-            content=prompt,
-        )
-        response = self.client.chat(
+        message = [
+            ChatMessage(
+                role='user',
+                content=prompt,
+            )
+        ]
+        response = self.client.chat_stream(
             model=model,
             temperature=temperature,
-            message=message
+            messages=message,
+            max_tokens=10_000
         )
-        new_code = response.choices[0].message.content
+        new_code = ''.join([chunk.choices[0].delta.content for chunk in response])
         return new_code
+    
+    def __call_googleai(self, model:str = 'palm', prompt:str=None, temperature: float = 0.1):
+        """
+        Call GoogleAI API
+        :param model: model name
+        :param prompt: prompt
+        :param temperature: temperature
+        :return: response
+        """
+        chat = self.client.start_chat()
+        response = chat.send_message(prompt)
+        return response.text
     
     def get_smart_contract_from_ai(self, prompt, legal_agreement_file_path: str, temperature: float = 0.1, overwrite: bool = False):
         """
@@ -120,15 +135,15 @@ class Pipeline:
             try:
                 prompt_str = prompt(legal_agreement)
                 # Verify if the prompt exceedes the maximum number of tokens
-                enc = tiktoken.encoding_for_model(self.model)
-                no_tokens = len(enc.encode(prompt(legal_agreement)))
-                logging.info(f"Number of tokens for prompt: {no_tokens}")
                 if self.model in OPENAI:
+                    enc = tiktoken.encoding_for_model(self.model)
+                    no_tokens = len(enc.encode(prompt(legal_agreement)))
+                    logging.info(f"Number of tokens for prompt: {no_tokens}")
                     new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
                 elif self.model in MISTRALAI:
                     new_code = self.__call_mistralai(model=self.model, prompt=prompt_str, temperature=temperature)
                 elif self.model in GOOGLEAI:
-                    raise NotImplementedError(f"GoogleAI model '{self.model}' not implemented")
+                    new_code = self.__call_googleai(model=self.model, prompt=prompt_str, temperature=temperature)
                 else:
                     new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
 
@@ -150,7 +165,7 @@ class Pipeline:
         return gen_smart_contract
     
     @classmethod
-    def pipe(cls, legal_agreement_path: str, vul_tool: str = 'slither', model: str = "gpt-4-0125-preview", output_path: str = 'output', temperatures = [0.0, 0.5, 1, 1.5, 2],lambda_prompt: None = lambda x: f"x"):
+    def pipe(cls, legal_agreement_path: str, model: str = "gpt-4-0125-preview", output_path: str = 'output', temperatures = [0.0, 0.2, 0.5, 0.7, 1],lambda_prompt: None = lambda x: f"{x}"):
         # Temperatures accoding to https://arxiv.org/pdf/2309.08221.pdf
         assert os.path.exists(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' does not exist"
         assert os.listdir(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' is empty"
@@ -161,7 +176,7 @@ class Pipeline:
             for temperature in temperatures:
                 file_name, _ = os.path.splitext(file)
 
-                inst = cls(vul_tool, model, os.path.join(output_path, file_name))
+                inst = cls(model, os.path.join(output_path, file_name))
                 sc_gen = inst.get_smart_contract_from_ai(lambda_prompt, temperature=temperature, legal_agreement_file_path=abs_file)
                 logging.debug(f"Smart contract generated for '{file}':\n{pformat(sc_gen)}")
         
