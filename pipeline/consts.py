@@ -38,6 +38,6 @@ MISTRALAI = [
 ]
 
 GOOGLEAI = [
-    'models/gemini-pro',
+    'gemini-pro',
     # Optional, add PaLM 2
 ]
