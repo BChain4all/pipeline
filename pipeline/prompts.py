@@ -1,6 +1,8 @@
 ### Prompts following COSTAR guidelines
 # Ref. https://www.youtube.com/watch?v=CPsoesktio4
 
+import inspect
+
 CONTEXT = {
     1: "You are a Masters student in Computer Science.",
     2: "You are a junior developer.",
