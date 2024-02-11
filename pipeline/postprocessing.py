@@ -435,7 +435,10 @@ class SmartCMetrics:
                         for k, v in val.items():
                             score[f'{key}_score'] = metrics[key][k] * v
                     else:
-                        score[f'{key}_score'] = metrics[key] * val
+                        if key == 'pragma':
+                            score[f'{key}_score'] = val(metrics[key])
+                        else:
+                            score[f'{key}_score'] = metrics[key] * val
             return score
 
         sc = cls(path2sol, vul_tool, path2sol_ref)
@@ -449,24 +452,29 @@ class SmartCMetrics:
             },
             'has_comments': 0.5,
             'no_param_with_initial_value': 0.5,
+            'no_contracts': 0.25,
+            'no_functions': 0.15,
+            # 'no_external_calls': 0.5,
+            'pragma': lambda x: 1 if x.split('.')[1] == '8' else 0
         }
 
         metrics = {
             'compilable': sc.is_compilable,
             'name': sc.file_name,
             'pragma': sc.pragma,
+            'no_pragma': int(sc.pragma.split(".")[1]),
             'temperature': re.findall(r"_t(.*).sol", sc.file_name)[0] if re.findall(r"_t(.*).sol", sc.file_name) else 'N/A',
             'vul_report': sc.vul_report,
             'vul_summary': sc.vul_summary,
             'vul_count': sc.vul_count,
-            'no_contracts': sc.no_contracts if sc.is_compilable else None,
-            'no_functions': sc.no_functions if sc.is_compilable else None,
-            'no_functions_per_contract': sc.no_functions_per_contract if sc.is_compilable else None,
+            'no_contracts': sc.no_contracts if sc.is_compilable else 0,
+            'no_functions': sc.no_functions if sc.is_compilable else 0,
+            'no_functions_per_contract': sc.no_functions_per_contract if sc.is_compilable else 0,
             'has_comments': sc.has_comments,
-            'external_calls': sc.external_calls if sc.is_compilable else None,
-            'no_external_calls': sc.no_external_calls if sc.is_compilable else None,
-            'param_with_initial_value': sc.param_with_initial_value if sc.is_compilable else None,
-            'no_param_with_initial_value': sc.no_param_with_initial_value if sc.is_compilable else None,
+            'external_calls': sc.external_calls if sc.is_compilable else 0,
+            'no_external_calls': sc.no_external_calls if sc.is_compilable else 0,
+            'param_with_initial_value': sc.param_with_initial_value if sc.is_compilable else 0,
+            'no_param_with_initial_value': sc.no_param_with_initial_value if sc.is_compilable else 0,
             # 'bleu': sc.__compute_bleu(),
             # 'code_bleu': self.code_bleu_score
         }
