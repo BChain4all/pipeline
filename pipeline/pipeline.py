@@ -21,8 +21,6 @@ from mistralai.models.chat_completion import ChatMessage
 class Pipeline:
     CURR_DIR = os.path.dirname(os.path.realpath(__file__))
     PARENT_DIR = os.path.dirname(CURR_DIR)
-    TOKEN_MISTRALAI = settings.MISTRAL_API_KEY
-    TOKEN_GOOGLEAI = settings.GOOGLE_API_KEY
 
     def __init__(self, model: str = "gpt-4-turbo", output_path: str = 'output'):
         self.output_path = output_path
@@ -40,21 +38,18 @@ class Pipeline:
         if not os.path.exists(self.output_dir_vul):
             os.makedirs(self.output_dir_vul)
         self.model = model
-        if model in OPENAI:
-            self.TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
-            self.client = OpenAI(api_key = self.TOKEN_OPENAI)
-        elif model in MISTRALAI:
-            self.TOKEN_MISTRALAI = os.getenv("MISTRAL_API_KEY")
-            self.client = MistralClient(self.TOKEN_MISTRALAI)
-        elif model in GOOGLEAI:
-            self.TOKEN_GOOGLEAI = os.getenv("GOOGLE_API_KEY")
-            genai.configure(api_key=self.TOKEN_GOOGLEAI,)
+        if model in settings.OPENAI_MODELS:
+            self.client = OpenAI(api_key = settings.OPENAI_API_KEY)
+        elif model in settings.MISTRAL_MODELS:
+            self.client = MistralClient(settings.MISTRAL_API_KEY)
+        elif model in settings.GOOGLE_MODELS:
+            genai.configure(api_key=settings.GOOGLE_API_KEY)
             self.client = genai.GenerativeModel(model_name=model)
         else:
-            self.TOKEN_OPENAI = os.getenv("OPENAI_API_KEY")
-            self.client = OpenAI(api_key = self.TOKEN_OPENAI)
+            ## USe OpenAI by default
+            self.client = OpenAI(api_key = settings.OPENAI_API_KEY)
     
-    def __call_openai(self, model:str = 'gpt-4-0125-preview', prompt:str=None, temperature: float = 0.1):
+    def __call_openai(self, model:str = 'gpt-4-turbo', prompt:str=None, temperature: float = 0.1):
         """
         Call OpenAI API
         :param model: model name
@@ -89,13 +84,13 @@ class Pipeline:
                 content=prompt,
             )
         ]
-        response = self.client.chat_stream(
+        response = self.client.chat.complete(
             model=model,
             temperature=temperature,
             messages=message,
             max_tokens=10_000
         )
-        new_code = ''.join([chunk.choices[0].delta.content for chunk in response])
+        new_code = response.choices[0].message.content
         return new_code
     
     def __call_googleai(self, model:str = 'palm', prompt:str=None, temperature: float = 0.1):
@@ -135,14 +130,14 @@ class Pipeline:
             try:
                 prompt_str = prompt(legal_agreement)
                 # Verify if the prompt exceedes the maximum number of tokens
-                if self.model in OPENAI:
+                if self.model in settings.OPENAI_MODELS:
                     enc = tiktoken.encoding_for_model(self.model)
                     no_tokens = len(enc.encode(prompt(legal_agreement)))
                     logging.info(f"Number of tokens for prompt: {no_tokens}")
                     new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
-                elif self.model in MISTRALAI:
+                elif self.model in settings.MISTRAL_MODELS:
                     new_code = self.__call_mistralai(model=self.model, prompt=prompt_str, temperature=temperature)
-                elif self.model in GOOGLEAI:
+                elif self.model in settings.GOOGLE_MODELS:
                     new_code = self.__call_googleai(model=self.model, prompt=prompt_str, temperature=temperature)
                 else:
                     new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)

@@ -6,7 +6,7 @@ authors = ["BChain4All"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.12.0"
 openai = "^1.10.0"
 docker = "^7.0.0"
 tiktoken = "^0.5.2"
@@ -15,6 +15,7 @@ nltk = "^3.8.1"
 eth-brownie = {version = "^1.20.0", python = ">=3.10,<4.0"}
 pandas = "^2.2.0"
 google-generativeai = "^0.3.2"
+slither-analyzer = "^0.10.3"
 
 
 [build-system]
