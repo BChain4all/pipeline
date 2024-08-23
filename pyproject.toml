@@ -6,7 +6,7 @@ authors = ["BChain4All"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 openai = "^1.10.0"
 docker = "^7.0.0"
 tiktoken = "^0.5.2"

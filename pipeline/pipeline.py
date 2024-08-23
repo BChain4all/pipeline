@@ -4,7 +4,7 @@ from pprint import pformat
 import tiktoken
 import logging
 import re
-from .consts import OPENAI, MISTRALAI, GOOGLEAI
+from .core.config import settings
 import google.generativeai as genai 
 
 # Logging
@@ -21,10 +21,10 @@ from mistralai.models.chat_completion import ChatMessage
 class Pipeline:
     CURR_DIR = os.path.dirname(os.path.realpath(__file__))
     PARENT_DIR = os.path.dirname(CURR_DIR)
-    TOKEN_MISTRALAI = os.getenv("MISTRAL_API_KEY")
-    TOKEN_GOOGLEAI = os.getenv("GOOGLE_API_KEY")
+    TOKEN_MISTRALAI = settings.MISTRAL_API_KEY
+    TOKEN_GOOGLEAI = settings.GOOGLE_API_KEY
 
-    def __init__(self, model: str = "gpt-4-0125-preview", output_path: str = 'output'):
+    def __init__(self, model: str = "gpt-4-turbo", output_path: str = 'output'):
         self.output_path = output_path
         self.model = model
         self.output_dir = os.path.join(os.path.join(os.path.expanduser('~'), 'slither_shared'), output_path)
