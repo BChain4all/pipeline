@@ -115,7 +115,9 @@ contract SmartLeaseAgreement is ReentrancyGuard  {
     }
 
     function getSecurityDeposit() external onlyLandlord malitiousTenantBehavior nonReentrant {
-        (bool sent, ) = msg.sender.call{value: securityDeposit}("");
+        uint256 amount = securityDeposit;
+        securityDeposit = 0;
+        (bool sent, ) = msg.sender.call{value: amount}("");
         require(sent, "Failed to refund deposit to landlord for malitious intent.");
         emit SecurityDepositRefunded(tenant, securityDeposit);
         securityDeposit = 0;

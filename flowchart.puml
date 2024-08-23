@@ -1,0 +1,9 @@
+@startuml
+start
+:Select the legal agreement or text description;
+:Select prompt from 'prompts.py' script;
+:Run the 'main.py' script;
+:Generate the Smart Contract;
+:Computation of smart contract score;
+end
+@enduml
