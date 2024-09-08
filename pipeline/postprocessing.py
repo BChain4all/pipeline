@@ -393,7 +393,7 @@ class SmartCMetrics:
                 for node in nodes:
                     # if node.get('constant', False):
                     if node.get('name', False):
-                        valued_param[contract].append((node['name'], node['value']['value'] if node.get('value', False) else None))
+                        valued_param[contract].append((node['name'], node['value'].get('value', None) if node.get('value', False) else None))
             return valued_param
         return {}
     

@@ -1,0 +1,129 @@
+# Cleaning Service Contract Template
+ 
+Created by:
+
+[Sender.FirstName] [Sender.LastName] [Sender.Company]
+Prepared for:
+
+[Client.FirstName] [Client.LastName] 
+[Client.Company]
+
+#Content
+This cleaning services contract is entered into on agreement created date between [Sender.Company] (Service Provider), and [Client.Company] (Client), collectively known as the "Parties".
+
+[Client.Company] seeks to obtain facility cleaning services from [Sender.Company], and,
+
+[Sender.Company] agrees they are capable and willing to meet all requirements outlined in this cleaning services contract.
+
+# Services Provided
+[Sender.Company] agrees to offer the following services during the term of this contract.
+
+Services will be performed on an as-needed basis, and billed according to the table below.
+
+[Insert service Pricing Table here]
+|     Services      | Price | Quantity |
+|-------------------|-------|----------|
+| Lot Mintenance    |Price $| Quantity |
+| Restroom cleaning |Price $| Quantity |
+| Power Washing     |Price $| Quantity |
+
+
+# Term
+This cleaning services contract shall begin on contract start date and will conclude as of contract end date.
+
+If either party wishes to terminate this cleaning services contract prior to contract end date, written notice must be provided to the other party.
+
+# Independent Contractor
+
+[Sender.Company] is in agreement they are not an employee of [Client.Company] and will act as an independent contractor for the term of this cleaning service contract.
+
+# Performance
+[Sender.Company] agrees to provide services to the best of their ability at all times.
+
+[Client.Company] shall have the right to, at any time, perform an inspection of the [Sender.Company]’s work.
+
+Should [Client.Company] discover any fault or failure during such inspections, [Client.Company] reserves the right to withhold payment until such errors are corrected by [Sender.Company].
+
+Upon receipt of a notice of failure or fault from [Client.Company], [Sender.Company] agrees to fully address and remedy such errors as soon as reasonably possible.
+
+# Payment
+
+[Sender.Company] shall perform the above-listed services on an as-needed basis, and shall invoice the client as such.
+
+[Sender.Company] shall generate a complete invoice for all services rendered every 30 days.
+
+[Client.Company] agrees to pay all invoices associated with this cleaning agreement within 30 days of receipt unless notice of fault or failure to perform allows for delayed payment.
+
+Payments may be made via the following methods: digital payment.
+
+# Confidentiality
+Any information or knowledge obtained during the term of this cleaning services contract about [Client.Company] is considered confidential.
+
+[Sender.Company] agrees to keep all information not openly known to the public confidential and private as such.
+
+Should [Sender.Company] or its employees’ actions lead to [Client.Company]’s confidential information being disclosed to unauthorized parties, [Client.Company] shall have the right to seek full remedy in accordance with applicable copyright law.
+
+# Return of Property
+Upon conclusion of this cleaning service contract either by termination by either party or completion by completion of the agreed agreement term, all property given to [Sender.Company] by [Client.Company] shall be returned in the state it was given.
+
+This is inclusive of any documentation, keys, and any codes given.
+
+# Notices
+Any and all notifications between [Client.Company] and [Sender.Company] shall be done so in written form.
+
+Notices may be delivered in person, emailed, or mailed via certified letter to the following addresses.
+
+Client Address:
+Client certified email:
+
+
+Service Provider Address
+Service Provider certified email:
+
+# Indemnification
+Each party agrees to indemnify and hold the opposite party harmless against any and all liability or damages without limitation.
+
+The indemnification clause of this cleaning services contract shall survive the termination or conclusion of this agreement and shall remain in effect for a term of 12 months following conclusion or termination of this contract.
+
+# Modification of Agreement
+Any and all amendments to this cleaning services contract shall be submitted in writing and signed by both Parties.
+
+No amendment, modification, addition, or extension of this cleaning services contract shall be considered binding if not conducted in the prescribed manner.
+
+# Time of Essence
+This agreement is based on a fixed period and terms and shall remain as such.
+
+This cleaning services contract may be re-entered upon completion but will not be extended or drawn out by either party past [Document.ExpirationDate].
+
+# Assignment
+Under no term of this agreement shall [Sender.Company] subcontract any other individual or agency to complete any services included in this contract without prior written consent from [Client.Company].
+
+This article of the cleaning services contract shall not restrict [Sender.Company]’s ability to hire and retain employees of it’s own to conduct the listed services.
+
+Should [Client.Company] sell its interest in the property being serviced to another entity, that entity shall be responsible for adhering to the terms of this cleaning services contract in it’s entirety.
+
+# Entire Agreement
+This cleaning services contract shall constitute the entire agreement and shall replace any and all written or verbal agreements before this agreement.
+
+# Governing Law
+Any and all legal manners related to this cleaning services contract shall be subject to jurisdiction in the state of [Client.State].
+
+The Parties agree that in the instance of a disagreement both parties will seek mediation from a neutral arbitrator before seeking remedy through a court of law.
+
+Should any single term of this contract be held as unenforceable or illegal, the term shall be replaced with a similarly enforceable term.
+
+Upon the replacement or cancellation of any term of this agreement, all remaining terms will remain in full effect.
+
+# Acceptance
+Both parties are in agreement to all terms and conditions above and will, to their best abilities, fulfill all aspects of this cleaning services contract.
+
+The signatures below indicate complete consent and approval by each party.
+[Sender.Company] 
+[Sender.FirstName]
+[Signing Date]
+[Sender.LastName]
+
+[Client.Company] 
+[Client.FirstName]
+[Signing Date]
+[Client.LastName] 

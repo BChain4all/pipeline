@@ -42,8 +42,8 @@ STYLE = {
 }
 
 PROMPTS = {
-    # ### ---------- Masters student
-    # 'PR1': lambda x: f"""
+    ### ---------- Masters student
+    # 'PR01': lambda x: f"""
     # {CONTEXT[1]} {GOAL[1]}
 
     # {x}
@@ -51,7 +51,7 @@ PROMPTS = {
     # {STYLE[1]}
     # {AUDIENCE[1]}
     # """,
-    # 'PR2': lambda x: f"""
+    # 'PR02': lambda x: f"""
     # {CONTEXT[1]} {GOAL[1]}
 
     # {x}
@@ -59,7 +59,7 @@ PROMPTS = {
     # {STYLE[2]}
     # {AUDIENCE[2]}
     # """,
-    # 'PR3': lambda x: f"""
+    # 'PR03': lambda x: f"""
     # {CONTEXT[1]} {GOAL[1]}
 
     # {x}
@@ -67,7 +67,7 @@ PROMPTS = {
     # {STYLE[3]}
     # {AUDIENCE[2]}
     # """,
-    # 'PR4': lambda x: f"""
+    # 'PR04': lambda x: f"""
     # {CONTEXT[1]} {GOAL[1]}
 
     # {x}
@@ -75,7 +75,7 @@ PROMPTS = {
     # {STYLE[3]}
     # {AUDIENCE[2]}
     # """,
-    # 'PR5': lambda x: f"""
+    # 'PR05': lambda x: f"""
     # {CONTEXT[1]} {GOAL[2]}
 
     # {x}
@@ -84,7 +84,7 @@ PROMPTS = {
     # {AUDIENCE[2]}
     # """,
     # ### ---------- Junior developer
-    # 'PR6': lambda x: f"""
+    # 'PR06': lambda x: f"""
     # {CONTEXT[2]} {GOAL[1]}
 
     # {x}
@@ -92,7 +92,7 @@ PROMPTS = {
     # {STYLE[1]}
     # {AUDIENCE[1]}
     # """,
-    # 'PR7': lambda x: f"""
+    # 'PR07': lambda x: f"""
     # {CONTEXT[2]} {GOAL[1]}
 
     # {x}
@@ -100,7 +100,7 @@ PROMPTS = {
     # {STYLE[2]}
     # {AUDIENCE[3]}
     # """,
-    # 'PR8': lambda x: f"""
+    # 'PR08': lambda x: f"""
     # {CONTEXT[2]} {GOAL[1]}
 
     # {x}
@@ -108,7 +108,7 @@ PROMPTS = {
     # {STYLE[3]}
     # {AUDIENCE[3]}
     # """,
-    # 'PR9': lambda x: f"""
+    # 'PR09': lambda x: f"""
     # {CONTEXT[2]} {GOAL[1]}
 
     # {x}

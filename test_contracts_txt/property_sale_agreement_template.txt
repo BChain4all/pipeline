@@ -1,0 +1,110 @@
+# Property Sale Agreement Template
+ 
+Prepared for:
+[Seller.FirstName] [Seller.LastName]
+Prepared by:
+[Buyer.FirstName] [Buyer.LastName]
+This Real Estate Purchase Agreement (the "Agreement") is made and entered into by and between [Seller.FirstName] [Seller.LastName] (the "Seller") and [Buyer.FirstName] [Buyer.LastName] (the "Buyer"), referred to herein collectively as the "Parties."
+
+# Property Description
+The Seller agrees to sell and the Buyer agrees to purchase the following described real property (the "Property"):
+Street Address: (Property Street Address)
+City/State/ZIP: (City, State, ZIP Code)
+
+Legal Description: (Include the complete legal description of the property, as per the official records)
+The Property includes all fixtures, improvements, and appurtenances, including but not limited to, the following:
+(List specific fixtures, improvements, or appurtenances included in the sale)
+Any personal property not attached to the Property and not included in this Agreement shall be excluded from the sale.
+The Seller warrants that the Property will be conveyed free and clear of all liens, encumbrances, and claims, except as otherwise specified in this Agreement. The Buyer has the right to conduct inspections to verify the condition and boundaries of the Property before the closing date.
+
+# Purchase Price
+The total purchase price for the Property shall be (Purchase Price in numerical form) dollars $(Purchase Price in written form), payable as follows:
+•	Down Payment: The Buyer shall pay a down payment of (Down Payment Amount) to the Seller within (Number of Days) days of mutual acceptance of this Agreement.
+•	Financing: The balance of the purchase price, after deducting the down payment, shall be financed by the Buyer through (Specify Financing details, if applicable).
+•	Total Purchase Price: The total purchase price of the Property is therefore (Total Purchase Price), consisting of the down payment and financing.
+The Buyer shall provide proof of financing approval to the Seller within (Number of Days) days from the effective date of this Agreement. In the event the Buyer fails to secure financing within the specified timeframe, the Seller may exercise rights as outlined in the Agreement.
+All payments shall be made in lawful currency of the United States, and any closing costs or adjustments shall be allocated as specified in this Agreement.
+
+# Earnest Money
+To signify the Buyer's commitment to this Real Estate Purchase Agreement, the Buyer agrees to deposit earnest money in the amount of (Earnest Money Amount) within (Number of Days) days of mutual acceptance.
+
+## Payment Details
+The earnest money shall be paid by (Specify Payment Method, e.g., check, wire transfer) to (Party or Escrow Agent) and held in escrow until the closing of the transaction.
+
+## Refundable Conditions
+The earnest money is refundable under the following conditions:
+•	If the Buyer exercises a valid contingency and the Agreement is terminated.
+•	If the Seller defaults on the Agreement.
+
+## Forfeiture Conditions
+The earnest money may be forfeited if the Buyer defaults on the Agreement without valid cause.
+
+## Application to Purchase Price
+At closing, the earnest money shall be applied towards the purchase price or closing costs, unless otherwise agreed upon in writing.
+
+# Closing Date
+The closing of this transaction shall take place no later than (state the date).
+If either Party does not meet the closing date, the other Party may terminate this Agreement with written notice.
+
+# Contingencies
+This Real Estate Purchase Agreement is contingent upon the following:
+•	Inspection Contingency: Buyer has until (Inspection Deadline) to conduct inspections, with the right to terminate or negotiate based on findings.
+•	Financing Contingency: Buyer must secure acceptable financing and notify the Seller by (Financing Deadline), with termination options if financing is denied.
+•	Appraisal Contingency: The Property must appraise at or above the purchase price, with negotiation options within (Appraisal Resolution Period).
+•	Other Contingencies: (Specify additional contingencies if applicable).
+All timelines start from the effective date, and failure to satisfy or waive contingencies may lead to Agreement termination.
+
+# Title Insurance
+The Seller agrees to provide a current title insurance policy and legal description for the Property at the time of closing.
+The Seller shall also provide to the Buyer any other documentation requested by the title company, including proof of ownership and any documents necessary for the transfer of title.
+
+# Possession of Property
+The Buyer will receive possession of the property (state the timeframe) after closing.
+The Seller agrees to remove all personal property from the premises (state the timeframe) after closing.
+Financing
+The Buyer may finance the property purchase through (state the financing method), if applicable.
+The Buyer will be solely responsible for obtaining financing and shall provide proof of such funding to the Seller no later than (state the period).
+Any costs associated with obtaining financing shall be borne by the Buyer alone.
+
+# Miscellaneous
+Warranties and Representations
+The Seller warrants and represents that they have good and marketable title to the Property, free from any liens or encumbrances other than those disclosed in writing to the Buyer before the execution of this Agreement.
+The Seller further warrants and represents that they are the legal owner of the Property and are fully authorized to enter into this Agreement.
+The Buyer warrants and represents that they will, at their own expense, take any necessary steps to inspect and investigate the property to ensure its condition is satisfactory before closing.
+
+# Liability
+The Seller shall be held liable for any damages or injuries related to the property before closing.
+The Buyer is responsible for scheduling and performing an inspection of the property before closing and assumes all risks associated with the state of the property after closing.
+The Seller will not be liable for any damages, injuries, or losses suffered after closing.
+
+# Severability
+If any part of this Agreement is declared unenforceable or invalid, all remaining clauses will remain in full force and effect.
+The Parties further agree that if any part of this Agreement is deemed unenforceable or invalid, they shall negotiate in good faith to replace the offending clause with an enforceable and valid clause.
+
+# Damages
+In the event of breach or default of this Agreement, the non-breaching Party will be entitled to all damages, including consequential and incidental damages, arising from such a failure.
+
+# Dispute Resolution
+Any dispute arising out of or related to this Agreement shall be resolved through binding arbitration conducted by a mutually agreed upon arbitrator.
+The Parties agree to participate in good faith negotiations, which shall attempt to resolve any dispute without arbitration.
+If the dispute cannot be resolved between the Parties, either Party may pursue legal action or request that an agreement to mediate be reached.
+Any decision or award rendered by the arbitrator shall be legally binding and enforceable.
+
+# Confidentiality
+This Agreement and any information related to this Agreement shall be kept confidential by the Parties.
+No Party shall make any public statement about this Agreement without the prior written consent of the other Party.
+Jurisdiction
+This Agreement shall be governed and construed by [Seller.State].
+Each Party agrees that it shall not challenge or contest the validity or enforceability of this Agreement in any jurisdiction other than [Seller.State].
+
+# Modifications
+Any modifications to this Agreement must be in writing and signed by both Parties.
+The Parties agree that any verbal or email communication regarding modifications to this Agreement shall not be binding or enforceable.
+
+The Parties acknowledge that they have read and understood this Agreement, agreeing to its terms as of [Date.Registration]:
+
+[Seller.FirstName] [Seller.LastName]
+
+[Buyer.FirstName] [Buyer.LastName]
+
+

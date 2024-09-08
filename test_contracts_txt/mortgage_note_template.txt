@@ -1,0 +1,94 @@
+# Mortgage Note Template
+ 
+Created by:
+[Mortgagor.FirstName] [Mortgagor.LastName] [Mortgagor.Company]
+Prepared for:
+[Mortgagee.FirstName] [Mortgagee.LastName] 
+[Mortgagee.Company]
+
+# Content
+This Mortgage Note ("The Agreement") is made and executed as of this (number) day of (Month), (Year), ("the Effective Date") by and among/between:
+Mortgagor(s): [Mortgagor.LastName], [Mortgagor.FirstName], (Age), of legal age, currently residing at [Mortgagor.StreetAddress], [Mortgagor.City], [Mortgagor.State], [Mortgagor.PostalCode], [Mortgagor.Country] (collectively "The Mortgagor" or "The Borrower"); and
+Mortgagee(s): [Mortgagee.LastName], [Mortgagee.FirstName], (Age), of legal age, currently residing at [Mortgagee.StreetAddress], [Mortgagee.City], [Mortgagee.State], [Mortgagee.PostalCode], [Mortgagee.Country] (collectively "The Mortgagee" or "The Lender");
+
+WHEREAS, the Mortgagor acknowledges and confirms in this Agreement being indebted to the Mortgagee with the principal sum of (mortgage amount written in word form), (mortgage amount written in numeral form) in (currency), under and by virtue of a Promissory Note ("Note") included herewith and made an integral part hereof.
+
+WHEREAS, the Mortgagor’s indebtedness is evidenced by the Promissory Note (herein "Note") provided indicating the monthly installments of the principal sum with additional fees on the monthly interest rates along with the accrued interest, late fees, all other charges, costs, and expenses, should there be any issues of delay in the repayment schedule.
+
+WHEREAS, the Mortgagor acknowledges that the repayment of the total balance of the indebtedness should be paid within the span of (agreed period range of repayment) years or (number) months, as specified in the signed Promissory Note (herein "Note").
+
+WHEREAS, the Mortgagor has agreed to secure the payment of the Promissory Note (herein "Note") to the Mortgagee by means of a good and valid mortgage.
+
+WHEREAS, the Mortgagor, for and in consideration of the foregoing premises and as a security deposit for payment of the aforementioned obligation, the Mortgagor has agreed to transfer and conveyed, and by the aforementioned transfer and conveyed by way of Mortgage, unto the Mortgagee his/her heirs, employee, successors and assigns, and any personal representative of the Mortgagor that will serve as the Mortgagor’s guarantor in the event of unforeseen death of the Mortgagor or their evasion of liabilities.
+
+WHEREAS, to secure the performance of all the terms, covenants, agreements, conditions, and obligations written in this Note and this Mortgage, the Mortgagor or the Borrower wishes to grant the Mortgagee or the Lender its rights, title, and interest to the property (indicate the property or asset) located at (property or asset location) that will serve as the collateral, should the Mortgagor declare that he/she may no longer be able to deliver his/her obligation to this Note or Agreement.
+
+WHEREAS, the Mortgagor acknowledges the condition that the Mortgagee has no obligation in advising his/her due on a monthly basis but to comply on the monthly due date specified in the Note and in this Agreement.
+
+WHEREAS, the Mortgagor and the Mortgagee acknowledge that no amendment, modification, or waiver provision in any part of this agreement shall be effective unless such amendment, modification, or waiver is explicitly set forth in writing, signed by, and duly executed by both parties.
+
+WHEREAS, the Mortgagor agrees to provide his/her necessary personal details for the Mortgagee’s future references along with the list of names the Mortgagor provided that will serve as the Mortgagee’s contact persons should there be any unforeseen events that may occur that will greatly and directly affect this Note and Agreement.
+
+# MORTGAGOR INFORMATION
+Mortgagor Name:
+[Mortgagor.LastName] [Mortgagor.FirstName]
+Permanent Address:
+[Mortgagor.StreetAddress], [Mortgagor.City], [Mortgagor.State], [Mortgagor.PostalCode], [Mortgagor.Country]
+Mortgagor Office Address:
+[Mortgagor.Company]: (Street Address), (City), (State), (Postal Code), (Country)
+Mortgagor Contact Details:
+[Mortgagor.Phone]; [Mortgagor.Email] 
+Mortgagor Email Address:
+[Mortgagor.Email]
+
+| Name |Contact Number and Email Address | Address |
+|------|---------------------------------|---------|
+|      |                                 |         |
+|      |                                 |         |
+|      |                                 |         |
+|      |                                 |         |	
+
+# PROMISSORY NOTE
+(Indicate the Nature of Mortgage)
+FOR THE GOOD VALUE RECEIVED, the undersigned, [Mortgagor.LastName] [Mortgagor.FirstName] (collectively "The Mortgagor" or "The Borrower") hereby promises to pay to the order of [Mortgagee.LastName] [Mortgagee.FirstName] (collectively "The Mortgagee" or "The Lender"), the principal sum of (mortgage amount written in words), (mortgage amount in figures) in (currency) (the "Principal Amount") including interests accruing on the unpaid balance in accordance with the terms and conditions set forth below:
+
+# PAYMENTS
+The full balance of this Note, including all the accrued interest, late fees, other charges, costs, and expenses, is due and payable on the (number) day of (Month), (Year), hereinafter known as the "Due Date."
+All payments under this Note are applied first to any accrued interest and then to the Principal Amount.
+
+# PAYMENT SCHEDULE
+This note shall be payable in installments amounting to (amount in words), (amount in figures) in (currency). The first payment is due on (day) (month), (year), and due thereafter in equal consecutive installments on a monthly basis as agreed by the Mortgagor and the Mortgagee. It is obligatory for both parties to abide by the set payment schedule, for this Note is not in any way to be modified as agreed.
+
+# PREPAYMENT
+The Mortgagor may prepay his/her Obligation under this Note without any prepayment penalties.
+LATE FEES
+There shall be a late payment fee of (amount in words), (amount in figures) in (currency) if an installment is not paid on time, along with the default interest due if the Mortgagee did not receive the installment on the due date.
+
+# INTEREST
+The Principal Amount shall bear the interest of (amount in words), (amount in figures) in (currency) per annum, accruing monthly. Notwithstanding, the total interest charged shall not exceed the maximum amount allowed by the law, and the Mortgagor or Borrower shall not be obligated to pay any interest in excess of such amount.
+
+# GUARANTOR
+The Guarantor does hereby absolutely, irrevocably, and unconditionally guarantee that it shall participate in any dispute resolution activities between the Mortgagor and the Mortgagee, pursuant to this Note and Agreement.
+For security and greater certainty, the Guarantor has agreed to affix his signature after the Mortgagor in this part of the Note.
+
+
+[Mortgagee.FirstName] [Mortgagee.LastName]
+[Mortgagor.FirstName] [Mortgagor.LastName]
+
+[Guarantor.FirstName] [Guarantor.LastName]
+
+# ACKNOWLEDGMENT
+State/Republic of _____________
+County/City of _______________
+SUBSCRIBED AND SWORN TO BEFORE ME, a NOTARY PUBLIC from (County/City), (State/Country), this (number) day of (month), (year); personally appeared bearing the government identification with details provided below, to wit;
+Name ID Type/Number Date/Place of Issuance
+[Mortgagor.FirstName] [Mortgagor.LastName] (Mortgagor ID)  + (Insert place of issuance)
+[Mortgagee.FirstName] [Mortgagee.LastName] (Mortgagee ID)  + (Insert place of issuance)
+Known to me and known to be the same persons who executed the foregoing instrument consisting of four (4) pages, including the page where this acknowledgment is written, and they acknowledged that the same is their own free and voluntary act and deed and that of the corporations represented.
+
+IN WITNESS WHEREOF, I have hereunto set my hand and the notarial seal on the date and in the place herein above written.
+Notary Public
+Doc. No. _____;
+Page No. _____;
+Book No. _____;
+Series of _____;

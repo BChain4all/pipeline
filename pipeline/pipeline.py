@@ -15,8 +15,8 @@ logging.basicConfig(
 
 # This import must be here to avoid basiConfig of logging to be set to ERROR only
 # See. https://github.com/mistralai/client-python/blob/f9b006a94cb9a8624e8509dba4a7082a5f001239/src/mistralai/client_base.py#L17
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+from mistralai import Mistral
+from anthropic import Anthropic
 
 class Pipeline:
     CURR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -41,10 +41,12 @@ class Pipeline:
         if model in settings.OPENAI_MODELS:
             self.client = OpenAI(api_key = settings.OPENAI_API_KEY)
         elif model in settings.MISTRAL_MODELS:
-            self.client = MistralClient(settings.MISTRAL_API_KEY)
+            self.client = Mistral(api_key=settings.MISTRAL_API_KEY)
         elif model in settings.GOOGLE_MODELS:
             genai.configure(api_key=settings.GOOGLE_API_KEY)
             self.client = genai.GenerativeModel(model_name=model)
+        elif model in settings.ANTHROPIC_MODELS:
+            self.client = Anthropic(api_key=settings.ANTHROPIC_API_KEY)
         else:
             ## USe OpenAI by default
             self.client = OpenAI(api_key = settings.OPENAI_API_KEY)
@@ -78,16 +80,16 @@ class Pipeline:
         :param temperature: temperature (0, 1) # https://docs.mistral.ai/api/
         :return: response
         """
-        message = [
-            ChatMessage(
-                role='user',
-                content=prompt,
-            )
+        messages = [
+            {
+                'role': 'user',
+                'content': prompt
+            }
         ]
         response = self.client.chat.complete(
             model=model,
             temperature=temperature,
-            messages=message,
+            messages=messages,
             max_tokens=10_000
         )
         new_code = response.choices[0].message.content
@@ -101,9 +103,22 @@ class Pipeline:
         :param temperature: temperature
         :return: response
         """
-        chat = self.client.start_chat()
-        response = chat.send_message(prompt)
+        response = self.client.generate_content(prompt)
         return response.text
+    
+    def __call_anthropic(self, model: str, prompt: str, temperature: float = 0.0):
+        response = self.client.messages.create(
+            model=model,
+            temperature=temperature,
+            max_tokens=6_000,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+        return response.content[0].text
     
     def get_smart_contract_from_ai(self, prompt, legal_agreement_file_path: str, temperature: float = 0.1, overwrite: bool = False):
         """
@@ -131,14 +146,17 @@ class Pipeline:
                 prompt_str = prompt(legal_agreement)
                 # Verify if the prompt exceedes the maximum number of tokens
                 if self.model in settings.OPENAI_MODELS:
-                    enc = tiktoken.encoding_for_model(self.model)
-                    no_tokens = len(enc.encode(prompt(legal_agreement)))
-                    logging.info(f"Number of tokens for prompt: {no_tokens}")
+                    # enc = tiktoken.get_encoding(self.model)
+                    # no_tokens = len(enc.encode(prompt(legal_agreement)))
+                    # logging.info(f"Number of tokens for prompt: {no_tokens}")
                     new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
                 elif self.model in settings.MISTRAL_MODELS:
+                    logging.debug("Running MISTRAL MODELS")
                     new_code = self.__call_mistralai(model=self.model, prompt=prompt_str, temperature=temperature)
                 elif self.model in settings.GOOGLE_MODELS:
                     new_code = self.__call_googleai(model=self.model, prompt=prompt_str, temperature=temperature)
+                elif self.model in settings.ANTHROPIC_MODELS:
+                    new_code = self.__call_anthropic(model=self.model, prompt=prompt_str, temperature=temperature)
                 else:
                     new_code = self.__call_openai(model=self.model, prompt=prompt_str, temperature=temperature)
 
@@ -160,7 +178,7 @@ class Pipeline:
         return gen_smart_contract
     
     @classmethod
-    def pipe(cls, legal_agreement_path: str, model: str = "gpt-4-0125-preview", output_path: str = 'output', temperatures = [0.0, 0.2, 0.5, 0.7, 1],lambda_prompt: None = lambda x: f"{x}"):
+    def pipe(cls, legal_agreement_path: str, model: str = "gpt-4-turbo", output_path: str = 'output', temperatures = [0.0, 0.2, 0.5, 0.7, 1],lambda_prompt: None = lambda x: f"{x}"):
         # Temperatures accoding to https://arxiv.org/pdf/2309.08221.pdf
         assert os.path.exists(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' does not exist"
         assert os.listdir(legal_agreement_path), f"Given path for legal agreements'{legal_agreement_path}' is empty"

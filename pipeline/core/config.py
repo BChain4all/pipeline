@@ -1,7 +1,18 @@
-from pydantic import Field, computed_field, PostgresDsn
+from pydantic import Field, computed_field, PostgresDsn, BeforeValidator
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Any, Annotated
 
+
+def parse_lists(v: Any) -> list[str] | None:
+    print(v)
+    if v is None:
+        return None
+    elif isinstance(v, str) and not v.startswith("["):
+        return [i.strip() for i in v.split(",")]
+    if isinstance(v, list):
+        return v
+    raise ValueError(f"Invalid list format: {v}")
 
 class Settings(BaseSettings, cli_hide_none_type=True):
     
@@ -17,22 +28,22 @@ class Settings(BaseSettings, cli_hide_none_type=True):
     OPENAI_ORG_ID: str | None = Field(default=None)
     OPENAI_PROJ_ID: str | None = Field(default=None)
     OPENAI_MODEL: str | None = Field(default=None)
-    OPENAI_MODELS: list | None = Field(default=None)
+    OPENAI_MODELS: Annotated[list[str] | None, BeforeValidator(parse_lists)] = Field(default=None)
     
     # Claude Constants
-    CLAUDE_API_KEY: str | None = Field(default=None)
-    CLAUDE_MODEL: str | None = Field(default=None)
-    CLAUDE_MODELS: list | None = Field(default=None)
+    ANTHROPIC_API_KEY: str | None = Field(default=None)
+    ANTHROPIC_MODEL: str | None = Field(default=None)
+    ANTHROPIC_MODELS: Annotated[list[str] | None, BeforeValidator(parse_lists)] = Field(default=None)
     
     # Mistral Constants
     MISTRAL_API_KEY: str | None = Field(default=None)
     MISTRAL_MODEL: str | None = Field(default=None)
-    MISTRAL_MODELS: list | None = Field(default=None)
+    MISTRAL_MODELS: Annotated[list[str] | None, BeforeValidator(parse_lists)] = Field(default=None)
     
     # Gemini Constants
     GOOGLE_API_KEY: str | None = Field(default=None)
     GOOGLE_MODEL: str | None = Field(default=None)
-    GOOGLE_MODELS: list | None = Field(default=None)
+    GOOGLE_MODELS: Annotated[list[str] | None, BeforeValidator(parse_lists)] = Field(default=None)
     
     # PostgresSQL
     POSTGRES_SERVER: str = Field(default="localhost")

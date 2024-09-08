@@ -1,0 +1,46 @@
+# Compensation Agreement Template
+ 
+Created by:
+[Employer.FirstName] [Employer.LastName] [Employer.Company]
+Prepared for:
+[Employee.FirstName] [Employee.LastName] 
+[Employee.Company]
+# Content
+This COMPENSATION AGREEMENT ("Agreement") is entered on [Date.Start], by and between [Employer.FirstName][Employer.LastName] at [Employer.Company], located at [Employer.Country][Employer.StreetAddress] (the "Employer"), and [Employee.FirstName][Employee.LastName], residing at [Employee.StreetAddress] ("Employee").
+WHEREAS, the Employer desires to employ the Employee as its [Employee.Title] and the Employee desires to accept such employment, and the parties wish to set forth the terms and conditions of such employment in an agreement;
+NOW, THEREFORE, in consideration of the mutual covenants and obligations herein contained, the parties agree as follows:
+
+# Terms
+This Agreement shall be effective starting from [Date.Start] ("Effective Date") and shall remain in effect for one (1) year or the end of (insert year) ("Term"). Upon completion of the probationary period, and with the mutual agreement of both parties, they may extend the contract for an additional term.
+
+# Compensation
+The Employer shall pay to Employee a salary of [Payslip.Amount] per month ("Regular Salary"), payable under the Employer's standard payroll practices. In addition, the Employer shall provide bonuses, incentive payments, and other forms of additional compensation ("Additional Compensation") as may be established from time to time.
+
+# Benefits
+The Employer shall entitle the Employee to receive all standard employee benefits and other perquisites available to similarly situated employees of the Employer. Such benefits and perquisites shall include, but not be limited to, vacation pay, personal days, health insurance, disability insurance, and retirement plan contributions.
+
+# Duties and Responsibilities
+The nature of the Employee’s duties during their engagement with the Employer shall include those duties normally associated with a [Employee.Title], as determined by the Employer. It is to be understood that the Employee shall devote their full time and effort to performing their duties and responsibilities. There shall be no other outside employment or activities by the Employee that conflict with their duties and responsibilities.
+
+# Non-Competition and Confidentiality
+The Employee shall not, during their period of employment or thereafter, use or disclose any confidential information acquired by them while employed by the Employer. The Employee also agrees to abide by all non-compete clauses, including not to enter any agreement or engage in any business activity that directly competes with the Employer’s current activities or those it may have contemplated engaging in at the time of this Agreement.
+
+# Severability
+If any provision of this Agreement or portion thereof is held to be invalid or unenforceable, such provision shall be modified to the extent necessary to render it enforceable and capable of achieving, to the maximum extent permitted by law, the intent of the parties as reflected in that provision. If such modification is not possible, that provision will be severed from this agreement, and the remainder of this agreement shall remain in full force and effect.
+
+# Termination
+Either party may terminate this Agreement upon written notice to the other party, with or without cause. This Agreement shall end in the event of disability or death of the Employee.
+
+# Governing Law
+This Agreement and any claim or dispute relating to it or its formation (including non-contractual disputes or claims) shall be governed by and construed according to the laws of [Employee.State].
+
+# Agreement
+This Agreement constitutes the entire agreement between the parties, and no modifications hereto shall be effective unless made in writing and signed by both parties.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement on the day and year first written above.
+Employee:
+[Employee.FirstName] [Employee.LastName]
+
+Employer: 
+[Employer.FirstName] [Employer.LastName]
+
