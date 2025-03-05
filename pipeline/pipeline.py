@@ -41,6 +41,7 @@ class Pipeline:
         if model in settings.OPENAI_MODELS:
             self.client = OpenAI(api_key = settings.OPENAI_API_KEY)
         elif model in settings.MISTRAL_MODELS:
+            logging.info(f"Mistral api key: {settings.MISTRAL_API_KEY}")
             self.client = Mistral(api_key=settings.MISTRAL_API_KEY)
         elif model in settings.GOOGLE_MODELS:
             genai.configure(api_key=settings.GOOGLE_API_KEY)

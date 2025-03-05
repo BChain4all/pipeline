@@ -1906,13 +1906,13 @@ test = ["pytest"]
 
 [[package]]
 name = "mistralai"
-version = "1.0.2"
+version = "1.0.3"
 description = "Python Client SDK for the Mistral AI API."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "mistralai-1.0.2-py3-none-any.whl", hash = "sha256:af0f73730cc98508386342137f73898bcb7696a9541f3e5511608c9d831a2a42"},
-    {file = "mistralai-1.0.2.tar.gz", hash = "sha256:46fb4407d1a4161b23e1b2c4c735478433fb7a41abb05facd23272fb05d171b5"},
+    {file = "mistralai-1.0.3-py3-none-any.whl", hash = "sha256:64af7c9192e64dc66b2da6d1c4d54a1324a881c21665a2f93d6b35d9de9f87c8"},
+    {file = "mistralai-1.0.3.tar.gz", hash = "sha256:84f1a217666c76fec9d477ae266399b813c3ac32a4a348d2ecd5fe1c039b0667"},
 ]
 
 [package.dependencies]
@@ -1923,7 +1923,7 @@ python-dateutil = ">=2.9.0.post0,<3.0.0"
 typing-inspect = ">=0.9.0,<0.10.0"
 
 [package.extras]
-gcp = ["google-auth (>=2.31.0,<3.0.0)", "requests (>=2.32.3,<3.0.0)"]
+gcp = ["google-auth (==2.27.0)", "requests (>=2.32.3,<3.0.0)"]
 
 [[package]]
 name = "multidict"

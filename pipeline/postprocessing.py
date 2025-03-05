@@ -13,7 +13,7 @@ import nltk
 # Logging
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s")
 
 class SmartCMetrics:
@@ -35,7 +35,7 @@ class SmartCMetrics:
             "docker_image": "trailofbits/eth-security-toolbox",
             "host_path": os.path.join(os.path.expanduser('~'), 'slither_shared' ),
             "container_path": "/share",
-            "cmd": lambda sol_file, pragma: [f"solc-select install {pragma}", f"solc-select use {pragma}", f"slither {sol_file} --json -"],
+            "cmd": lambda sol_file, pragma: [f"solc-select install {pragma}", f"solc-select use {pragma}", f"npm install --prefix {os.path.dirname(sol_file)} @openzeppelin/contracts@4.9.5", f"mv {os.path.dirname(sol_file)}/node_modules/@openzeppelin {os.path.dirname(sol_file)}", f"slither {sol_file} --json -"],
             "cmd_err" : lambda sol_file, pragma: [f"solc-select use {pragma}", f"slither {sol_file}"] # This is the command to run if the last cmd returns a void json. Most likely, the smart contract does not compile
         },
         # Other vulnerability detection tools can be added
@@ -80,12 +80,16 @@ class SmartCMetrics:
         self.__path2sol_ref = path2sol_ref
 
         if self.is_compilable:
-            self.__abi = solcx.compile_source(self.__sol_code, solc_version=self.__pragma) 
-            # Parse the generated smart contract
-            self.__functions_per_contract = {contract: [abi_item['name'] for abi_item in self.__abi[f"<stdin>:{contract}"]['abi'] if abi_item.get('type', False) == 'function']
-                                            for contract in self.__contracts}
-            self.__no_functions_per_contract = {contract: len(self.__functions_per_contract[contract]) for contract in self.__functions_per_contract.keys()}
-            self.__no_functions = sum(self.__no_functions_per_contract.values())
+            # self.__abi = solcx.compile_files([self.__path2sol], solc_version=self.__pragma, allow_paths=os.path.dirname(self.__path2sol))
+            # # Parse the generated smart contract
+            # self.__functions_per_contract = {contract: [abi_item['name'] for abi_item in self.__abi[f"{self.__path2sol}:{contract}".replace("\\", "/")]['abi'] if abi_item.get('type', False) == 'function']
+            #                                 for contract in self.__contracts}
+            # self.__no_functions_per_contract = {contract: len(self.__functions_per_contract[contract]) for contract in self.__functions_per_contract.keys()}
+            # self.__no_functions = sum(self.__no_functions_per_contract.values())
+            self.__abi = {}
+            self.__functions_per_contract = {}
+            self.__no_functions_per_contract = {}
+            self.__no_functions = 0
         else:
             logging.warning("Smart contract does not compile. Skipping BLEU and CodeBLEU score calculation.")
             self.__abi = {}
@@ -269,12 +273,13 @@ class SmartCMetrics:
             path2sc_sol_in_shared_folder = '/'.join([self.vul_tool['container_path'], relative_path2sc_sol_in_shared_folder])
             logging.info(f"Path to smart contract in shared folder: {path2sc_sol_in_shared_folder}")
             cmd = self.vul_tool['cmd'](path2sc_sol_in_shared_folder, pragma)
+            logging.info(cmd)
             cmd_err = self.vul_tool['cmd_err'](path2sc_sol_in_shared_folder, pragma)
         
         # Run command
         if isinstance(cmd, list):
             for c in cmd:
-                logging.debug(f"Running command: {c}")
+                logging.info(f"Running command: {c}")
                 _, output = container.exec_run(cmd=c, stdin=True)
                 logging.info(f'Slither output:\n{_}\n{output}')
             
@@ -389,7 +394,7 @@ class SmartCMetrics:
         if self.__vul_report['compilable']:
             valued_param = {contract: [] for contract in self.__contracts}
             for contract in self.__contracts:
-                nodes = self.__abi[f'<stdin>:{contract}']['ast']['nodes'][1]['nodes']
+                nodes = self.__abi[f"{self.__path2sol}:{contract}".replace("\\", "/")]['ast']['nodes'][1]['nodes']
                 for node in nodes:
                     # if node.get('constant', False):
                     if node.get('name', False):
@@ -473,8 +478,10 @@ class SmartCMetrics:
             'has_comments': sc.has_comments,
             'external_calls': sc.external_calls if sc.is_compilable else 0,
             'no_external_calls': sc.no_external_calls if sc.is_compilable else 0,
-            'param_with_initial_value': sc.param_with_initial_value if sc.is_compilable else 0,
-            'no_param_with_initial_value': sc.no_param_with_initial_value if sc.is_compilable else 0,
+            # 'param_with_initial_value': sc.param_with_initial_value if sc.is_compilable else 0,
+            'param_with_initial_value': 0,
+            # 'no_param_with_initial_value': sc.no_param_with_initial_value if sc.is_compilable else 0,
+            'no_param_with_initial_value': 0,
             # 'bleu': sc.__compute_bleu(),
             # 'code_bleu': self.code_bleu_score
         }
@@ -542,15 +549,16 @@ class SmartCMetrics:
                                     if os.path.isdir(legal_agreement_path):
                                         legal_agreement_sc_path = os.path.join(legal_agreement_path, 'sc')
                                         for sol_name_path in os.listdir(legal_agreement_sc_path):
-                                            sol_path = os.path.join(legal_agreement_sc_path, sol_name_path)
-                                            logging.info(f"                -> Smart contract path: {sol_path}")
-                                            if os.path.isfile(sol_path):
-                                                sc_sol_metrics = SmartCMetrics.get_sc_metrics(sol_path, vul_tool, path2sol_ref)
-                                                sc_sol_metrics.update({'prompt': prompt_name_path})
-                                                sc_sol_metrics.update({'legal_agreement': legal_agreement_name_path})
-                                                to_pandas.append(sc_sol_metrics)
-                                            else:
-                                                logging.warning(f"                ->Path '{sol_path}' is not a file")
+                                            if sol_name_path.endswith('.sol'):
+                                                sol_path = os.path.join(legal_agreement_sc_path, sol_name_path)
+                                                logging.info(f"                -> Smart contract path: {sol_path}")
+                                                if os.path.isfile(sol_path):
+                                                    sc_sol_metrics = SmartCMetrics.get_sc_metrics(sol_path, vul_tool, path2sol_ref)
+                                                    sc_sol_metrics.update({'prompt': prompt_name_path})
+                                                    sc_sol_metrics.update({'legal_agreement': legal_agreement_name_path})
+                                                    to_pandas.append(sc_sol_metrics)
+                                                else:
+                                                    logging.warning(f"                ->Path '{sol_path}' is not a file")
                                     else:
                                         logging.warning(f"            -> Path '{legal_agreement_path}' is not a directory")
                     data = pd.DataFrame(to_pandas)
