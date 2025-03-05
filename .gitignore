@@ -18,6 +18,7 @@ build/
 # Ignore IDE specific files
 .idea/
 .vscode/
+.hypothesis/
 *.swp
 *.swo
 *.swn
