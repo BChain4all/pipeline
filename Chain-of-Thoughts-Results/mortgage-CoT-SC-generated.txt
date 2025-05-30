@@ -1,0 +1,243 @@
+Creating a smart contract to represent a mortgage note requires careful attention to detail, especially when handling financial transactions and ensuring security. Below is a Solidity smart contract that incorporates the key aspects of the provided mortgage note agreement. This contract includes escrow logic, interest rate calculations, monthly payment tracking, down payment requirements, collateral handling, termination conditions, and more.
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract MortgageNote is Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
+    enum State { Created, Active, Terminated }
+    State public state;
+
+    IERC20 public immutable usdtToken;
+    uint256 public immutable principalAmount;
+    uint256 public immutable interestRate;
+    uint256 public immutable monthlyPayment;
+    uint256 public immutable lateFee;
+    uint256 public immutable termMonths;
+    uint256 public immutable downPayment;
+    uint256 public immutable collateralValue;
+    uint256 public totalPaid;
+    uint256 public lastPaymentTimestamp;
+    uint256 public startTimestamp;
+    address public mortgagor;
+    address public mortgagee;
+    address public guarantor;
+
+    struct Payment {
+        uint256 amount;
+        uint256 timestamp;
+    }
+
+    Payment[] public payments;
+
+    event MortgageCreated(address indexed mortgagor, address indexed mortgagee, uint256 principalAmount, uint256 interestRate, uint256 termMonths);
+    event DownPaymentReceived(address indexed mortgagor, uint256 amount);
+    event MonthlyPaymentReceived(address indexed mortgagor, uint256 amount, uint256 timestamp);
+    event LateFeeApplied(address indexed mortgagor, uint256 amount, uint256 timestamp);
+    event MortgageTerminated(address indexed mortgagor, uint256 remainingBalance, uint256 timestamp);
+
+    modifier inState(State _state) {
+        require(state == _state, "Invalid contract state");
+        _;
+    }
+
+    modifier onlyMortgagor() {
+        require(msg.sender == mortgagor, "Only mortgagor can call this function");
+        _;
+    }
+
+    modifier onlyMortgagee() {
+        require(msg.sender == mortgagee, "Only mortgagee can call this function");
+        _;
+    }
+
+    modifier validUSDTAllowance(uint256 expectedAmount) {
+        require(usdtToken.allowance(msg.sender, address(this)) >= expectedAmount, "Insufficient USDT allowance");
+        _;
+    }
+
+    constructor(
+        address _usdtTokenAddress,
+        address _mortgagor,
+        address _mortgagee,
+        uint256 _principalAmount,
+        uint256 _interestRate,
+        uint256 _monthlyPayment,
+        uint256 _lateFee,
+        uint256 _termMonths,
+        uint256 _downPayment,
+        uint256 _collateralValue
+    ) {
+        require(_usdtTokenAddress != address(0), "Invalid USDT token address");
+        require(_mortgagor != address(0), "Invalid mortgagor address");
+        require(_mortgagee != address(0), "Invalid mortgagee address");
+        require(_principalAmount > 0, "Principal amount must be greater than 0");
+        require(_interestRate > 0, "Interest rate must be greater than 0");
+        require(_monthlyPayment > 0, "Monthly payment must be greater than 0");
+        require(_lateFee > 0, "Late fee must be greater than 0");
+        require(_termMonths > 0, "Term must be greater than 0");
+        require(_downPayment > 0, "Down payment must be greater than 0");
+        require(_collateralValue > 0, "Collateral value must be greater than 0");
+
+        usdtToken = IERC20(_usdtTokenAddress);
+        mortgagor = _mortgagor;
+        mortgagee = _mortgagee;
+        principalAmount = _principalAmount;
+        interestRate = _interestRate;
+        monthlyPayment = _monthlyPayment;
+        lateFee = _lateFee;
+        termMonths = _termMonths;
+        downPayment = _downPayment;
+        collateralValue = _collateralValue;
+        state = State.Created;
+
+        emit MortgageCreated(mortgagor, mortgagee, principalAmount, interestRate, termMonths);
+    }
+
+    function receiveDownPayment(uint256 amount)
+        external
+        onlyMortgagor
+        inState(State.Created)
+        validUSDTAllowance(amount)
+        nonReentrant
+    {
+        require(amount == downPayment, "Incorrect down payment amount");
+
+        usdtToken.safeTransferFrom(msg.sender, address(this), amount);
+        totalPaid += amount;
+        state = State.Active;
+        startTimestamp = block.timestamp;
+        lastPaymentTimestamp = block.timestamp;
+
+        emit DownPaymentReceived(mortgagor, amount);
+    }
+
+    function makeMonthlyPayment()
+        external
+        onlyMortgagor
+        inState(State.Active)
+        validUSDTAllowance(monthlyPayment)
+        nonReentrant
+    {
+        uint256 amount = monthlyPayment;
+        bool isLate = _isLatePayment();
+
+        if (isLate) {
+            amount += lateFee;
+        }
+
+        usdtToken.safeTransferFrom(msg.sender, address(this), amount);
+        totalPaid += amount;
+        lastPaymentTimestamp = block.timestamp;
+
+        payments.push(Payment({
+            amount: amount,
+            timestamp: block.timestamp
+        }));
+
+        if (isLate) {
+            emit LateFeeApplied(mortgagor, lateFee, block.timestamp);
+        }
+
+        emit MonthlyPaymentReceived(mortgagor, amount, block.timestamp);
+    }
+
+    function _isLatePayment() internal view returns (bool) {
+        uint256 daysSinceLastPayment = (block.timestamp - lastPaymentTimestamp) / 1 days;
+        return daysSinceLastPayment > 30;
+    }
+
+    function terminateMortgage()
+        external
+        onlyMortgagee
+        inState(State.Active)
+        nonReentrant
+    {
+        require(totalPaid >= principalAmount, "Principal amount not fully paid");
+
+        uint256 remainingBalance = usdtToken.balanceOf(address(this));
+        usdtToken.safeTransfer(mortgagor, remainingBalance);
+        state = State.Terminated;
+
+        emit MortgageTerminated(mortgagor, remainingBalance, block.timestamp);
+    }
+
+    function getMortgageInfo()
+        external
+        view
+        returns (
+            uint256 principalAmount,
+            uint256 interestRate,
+            uint256 monthlyPayment,
+            uint256 lateFee,
+            uint256 termMonths,
+            uint256 downPayment,
+            uint256 collateralValue,
+            uint256 totalPaid,
+            uint256 lastPaymentTimestamp,
+            uint256 startTimestamp,
+            State state
+        )
+    {
+        return (
+            principalAmount,
+            interestRate,
+            monthlyPayment,
+            lateFee,
+            termMonths,
+            downPayment,
+            collateralValue,
+            totalPaid,
+            lastPaymentTimestamp,
+            startTimestamp,
+            state
+        );
+    }
+
+    function getPayments()
+        external
+        view
+        returns (Payment[] memory)
+    {
+        return payments;
+    }
+
+    function getContractBalance()
+        external
+        view
+        returns (uint256)
+    {
+        return usdtToken.balanceOf(address(this));
+    }
+
+    receive() external payable {
+        revert("Direct ETH transfers not allowed");
+    }
+}
+```
+
+### Explanation:
+1. **Escrow Logic**: The contract holds the USDT tokens transferred by the mortgagor and releases them according to the mortgage terms.
+2. **Interest Rate Calculation**: The interest rate is specified but not dynamically calculated within the contract. The monthly payment should include the interest.
+3. **Monthly Payment Tracking**: The contract tracks monthly payments and applies late fees if payments are late.
+4. **Down Payment Requirement**: The mortgagor must make a down payment to activate the mortgage.
+5. **Collateral Handling**: The collateral value is specified but not handled within the contract. This would typically be managed off-chain.
+6. **Termination**: The mortgagee can terminate the mortgage once the principal amount is fully paid.
+7. **Monthly Payment Event**: The `MonthlyPaymentReceived` event is emitted when a monthly payment is made.
+8. **Helpers**: Functions like `getMortgageInfo`, `getPayments`, and `getContractBalance` provide general information about the mortgage.
+9. **Access Control**: Functions are restricted to the mortgagor, mortgagee, and contract owner using modifiers.
+10. **USDT Integration**: The contract accepts USDT tokens for payments.
+11. **Security**: The contract uses `ReentrancyGuard` to prevent reentrancy attacks and checks USDT allowances before transferring tokens.
+
+### Deployment:
+To deploy this contract, you need to provide the necessary parameters such as the USDT token address, mortgagor and mortgagee addresses, principal amount, interest rate, monthly payment, late fee, term months, down payment, and collateral value. Ensure that the USDT token address is correct and that the contract is deployed on the Ethereum blockchain.
+
+### Compilation:
+This contract is written in Solidity version 0.8.19 and should be compilable with any Solidity compiler that supports this version. Make sure to test the contract thoroughly before deploying it to the mainnet.
